@@ -7,8 +7,8 @@
       "id": "toc",
       "bbox": [448, 10, 578, 24],
       "bg": [0.106, 0.137, 0.235],
-      "color": [0.62, 0.66, 0.74],
-      "size": 7, "align": 2,
+      "color": [0.114, 0.114, 0.106],
+      "size": 9, "align": 2,
       "en": "BACK TO TABLE OF CONTENTS",
       "pl": "POWRÓT DO SPISU TREŚCI"
     },
@@ -16,7 +16,7 @@
       "id": "title",
       "bbox": [42, 64, 235, 108],
       "bg": [0.106, 0.137, 0.235],
-      "color": [0.96, 0.78, 0.16],
+      "color": [0.329, 0.153, 0.486],
       "size": 15, "align": 0, "bold": true,
       "en": "PART 1: LEARN TO PLAY",
       "pl": "CZĘŚĆ 1:\nNAUKA GRY"
@@ -25,7 +25,7 @@
       "id": "left-col",
       "bbox": [42, 111, 240, 250],
       "bg": [0.106, 0.137, 0.235],
-      "color": [0.88, 0.90, 0.94],
+      "color": [0.114, 0.114, 0.106],
       "size": 8.5, "align": 3,
       "en": "WORKED EXAMPLE: STARTING ROUNDS. ... Below are the first two rounds of the game between the TERRANS, played by Katherine, and the ZERG, played by James.",
       "pl": "PRZYKŁAD ROZGRYWKI: PIERWSZE RUNDY\n\nBitwy w grze StarCraft: Tabletop Miniatures Game rozgrywają się na polu bitwy podzielonym na kolejne fazy tury. Poniżej przedstawiamy pierwsze dwie rundy partii rozgrywanej pomiędzy TERRANAMI, którymi dowodzi Katherine, a ZERGAMI, którymi dowodzi James."
@@ -34,7 +34,7 @@
       "id": "right-col",
       "bbox": [250, 64, 448, 288],
       "bg": [0.106, 0.137, 0.235],
-      "color": [0.88, 0.90, 0.94],
+      "color": [0.114, 0.114, 0.106],
       "size": 8.5, "align": 3,
       "en": "They both agree to choose a Mission and Deployment Card... After that, they prepare the battlefield... Once the battlefield is set up...",
       "pl": "Oboje zgadzają się wspólnie wybrać Kartę Misji oraz Kartę Rozmieszczenia, aby stworzyć klasyczne starcie. Następnie razem przygotowują pole bitwy, rozmieszczając teren w sposób zapewniający obu stronom osłonę oraz cele specjalne.\n\nGdy pole bitwy jest już gotowe, a kości przygotowane, obaj gracze mogą rozpocząć rozgrywkę w pierwszej rundzie."

@@ -32,10 +32,13 @@ def main(lang="pl", page_no=6):
     src = ROOT / "sources/pdf" / spec["doc"]
     doc = fitz.open(src)
     page = doc[spec["page"]]
-    # 1) erase every region with its background colour (images preserved)
+    # 1) erase ONLY the text glyphs in each region — keep line-art + images, paint no fill.
+    #    (Painting a flat fill left grey patches because the page background is a full-page image.)
     for r in spec["regions"]:
-        page.add_redact_annot(fitz.Rect(r["bbox"]), fill=tuple(r["bg"]))
-    page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+        page.add_redact_annot(fitz.Rect(r["bbox"]))
+    page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE,
+                          graphics=fitz.PDF_REDACT_LINE_ART_NONE,
+                          text=fitz.PDF_REDACT_TEXT_REMOVE)
     # 2) reflow PL into each region
     for r in spec["regions"]:
         ff = BOLD if r.get("bold") else REG
