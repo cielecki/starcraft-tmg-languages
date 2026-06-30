@@ -1,0 +1,242 @@
+[
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-TMG_EN.pdf",
+    "file": "pdf/StarCraft-TMG_EN.pdf",
+    "bytes": 15688406,
+    "sha256": "27639c562e6db9777dd9ba984d0c9f9b581841ec30166848e021f893cd00ea54",
+    "pages": 128
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-Marine_EN.pdf",
+    "file": "pdf/StarCraft-Terran-Marine_EN.pdf",
+    "bytes": 7731494,
+    "sha256": "9aba34b625e21c095801f1d8df7c59a94f6c31055a4e971422d1430f5bae75e2",
+    "pages": 16
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-Marauder_EN.pdf",
+    "file": "pdf/StarCraft-Terran-Marauder_EN.pdf",
+    "bytes": 4064448,
+    "sha256": "abeb609d8967b34ac29682e481a5564781dda55c9759780294c0d76c21f525cb",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-Medic_EN.pdf",
+    "file": "pdf/StarCraft-Terran-Medic_EN.pdf",
+    "bytes": 3355638,
+    "sha256": "2479ece42987031166692c6abe9764ef92a28d9239fbea09a0daa997eaac9b11",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-Goliath_EN.pdf",
+    "file": "pdf/StarCraft-Terran-Goliath_EN.pdf",
+    "bytes": 4016358,
+    "sha256": "869b01d4496c09df80a1e998d88fae82dbf6b69aaec978b0cc70c9636343f16a",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-JimRaynor-RR_EN.pdf",
+    "file": "pdf/StarCraft-Terran-JimRaynor-RR_EN.pdf",
+    "bytes": 3959614,
+    "sha256": "e3b3d28ff18393a73817f522529006302e56be279c3e812cc455e854926a04c0",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Zealot_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Zealot_EN.pdf",
+    "bytes": 6342565,
+    "sha256": "e235e2eb91b0aa2768f034741fa27f826d06e7f049aa7ebfbed672be6b1b989d",
+    "pages": 12
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Stalker_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Stalker_EN.pdf",
+    "bytes": 4501379,
+    "sha256": "cb2b1018dacad5e5c9e7122d1d1e6b11f3b989f092add8245be59fd1b396f8fb",
+    "pages": 12
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Adept_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Adept_EN.pdf",
+    "bytes": 4672400,
+    "sha256": "a3080ffdbc8979a4ba4588bc5e4a44dfb1a4463f70c58f71ba68a2cb1939c159",
+    "pages": 12
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Sentry_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Sentry_EN.pdf",
+    "bytes": 3623422,
+    "sha256": "d22add5120a042062a1f06f458654ac88f1215e8d1bf0ad74c008dce8b7c6314",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Artanis-H_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Artanis-H_EN.pdf",
+    "bytes": 4773805,
+    "sha256": "b2857b7ee8cd0241f3ea5dcb78be478c597eb575451b7113de132fa88c09c22b",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-Zergling_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-Zergling_EN.pdf",
+    "bytes": 4499237,
+    "sha256": "97a8d8a8b694de4d1b76e6379b91828f02705ad744636eb9166c4cf3b471987f",
+    "pages": 12
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-Roach_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-Roach_EN.pdf",
+    "bytes": 5070346,
+    "sha256": "b54feca83a25320fc73da4cd043be57ef17f6452e07906c1369f109a84dc381f",
+    "pages": 12
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-Hydralisk_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-Hydralisk_EN.pdf",
+    "bytes": 4169230,
+    "sha256": "2c82ddceb06d3883d9fd7e0d9ba4446cceea998372a280155db6f47f3226c46e",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-Queen_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-Queen_EN.pdf",
+    "bytes": 3662032,
+    "sha256": "daa425b8b8ce22df7e39fb0ee0f70ea64e41e6b07b0667fafaef26e9ab46b33e",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-Kerrigan-PK_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-Kerrigan-PK_EN.pdf",
+    "bytes": 4990294,
+    "sha256": "b3036e49971f833933a05867064dafc7d952cdcd32eb96ddd6a2c61717a87696",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terran-P2P-Card-Sheets-A4_EN.pdf",
+    "file": "pdf/StarCraft-Terran-P2P-Card-Sheets-A4_EN.pdf",
+    "bytes": 2609994,
+    "sha256": "afa3f229db61444d0673dea35e31772530a4c39dadaa0e281ba1bae0d271109c",
+    "pages": 14
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf",
+    "bytes": 3233470,
+    "sha256": "4e8547b2df8d545df3d0ebb7d7821521a888dc0437d6f4dde21d82145337a212",
+    "pages": 14
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Zerg-P2P-Card-Sheets-A4_EN.pdf",
+    "file": "pdf/StarCraft-Zerg-P2P-Card-Sheets-A4_EN.pdf",
+    "bytes": 3465781,
+    "sha256": "6810f46ee422ac5d8f3cc169c3eda3ccb9551f01ab71a1f7e4ac8c266817b364",
+    "pages": 20
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Terrain-Lost-Temple_EN.pdf",
+    "file": "pdf/StarCraft-Terrain-Lost-Temple_EN.pdf",
+    "bytes": 4392359,
+    "sha256": "de914aa0db095e3021a2a51e7ef2a1500759d4d02ca0b3bb2970797607124d42",
+    "pages": 8
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-2P-Starter-Set-FE_EN.pdf",
+    "file": "pdf/StarCraft-2P-Starter-Set-FE_EN.pdf",
+    "bytes": 27346881,
+    "sha256": "b5cdee06a2c7a6766e557187a61c1b6dd0465598ed50b39a3e3fc5e46b3f6e89",
+    "pages": 48
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/StarCraft-Protoss-Starter-Set-FE_EN.pdf",
+    "file": "pdf/StarCraft-Protoss-Starter-Set-FE_EN.pdf",
+    "bytes": 10577254,
+    "sha256": "67d6ba38dea5ceb621413e1d3de666d5a758d68c2edef53d970910407b191e64",
+    "pages": 28
+  },
+  {
+    "type": "pdf",
+    "url": "https://starcraft-tmg.com/files/downloads/Zeratul%20Promo%20Manual.pdf",
+    "file": "pdf/Zeratul Promo Manual.pdf",
+    "bytes": 5491198,
+    "sha256": "69c8ac6a2e71af23bd2c663cc24cf809982a3b9ad77bfc5281355216918ed06e",
+    "pages": 6
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/army_units?pageSize=400",
+    "file": "firestore/army_units.json",
+    "bytes": 265800,
+    "sha256": "ecc364d12e64d68b5b8e6a1ff703e99cd30564c9b4e4bfe30cd004952b52683e",
+    "documents": 26
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/tactical_cards?pageSize=400",
+    "file": "firestore/tactical_cards.json",
+    "bytes": 91977,
+    "sha256": "863053ad51c74613a2f26a1227f96997adb81b7b74c4b6da2a987b2f36939cc4",
+    "documents": 37
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/faction_cards?pageSize=400",
+    "file": "firestore/faction_cards.json",
+    "bytes": 345535,
+    "sha256": "51f5f2291b4a94bc0f89e8851589c74ca10dcd354a707ee58afe76eb36488637",
+    "documents": 180
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/rules_sections?pageSize=400",
+    "file": "firestore/rules_sections.json",
+    "bytes": 730087,
+    "sha256": "c20c3fb24d7aa070cc8ababd36ee4caee7b5c9e59ea89c760668dc7f06a392c6",
+    "documents": 15
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/map_assets_terrain?pageSize=400",
+    "file": "firestore/map_assets_terrain.json",
+    "bytes": 11901,
+    "sha256": "9b3a1ebb89f0cf2becb533b387f98585901eeebb98b3f14256b11b1acc7c551d",
+    "documents": 13
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/map_backgrounds?pageSize=400",
+    "file": "firestore/map_backgrounds.json",
+    "bytes": 679,
+    "sha256": "7bfba4b8159caa3ff0b95ccef22fb1f07af6620fba698f705e1db93e0715aeda",
+    "documents": 1
+  },
+  {
+    "type": "firestore",
+    "url": "https://firestore.googleapis.com/v1/projects/starcrafttmgbeta/databases/starcrafttmgbeta/documents/saved_maps?pageSize=400",
+    "file": "firestore/saved_maps.json",
+    "bytes": 1127111,
+    "sha256": "c518efc546cadcb77765f6c4a613e4f55b65a2ca04c9717c3512e14428c449b5",
+    "documents": 59
+  }
+]

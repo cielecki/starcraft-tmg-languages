@@ -32,10 +32,14 @@ the same machinery. Design favors small, independently-testable units with clear
 - **Interface out:** `translations/pl/<doc>.jsonl` (source+target per segment), status-tracked.
 
 ### 4. PDF generation  (`scripts/generate/`, output → `build/` gitignored)
-- **Cards/templates:** rebuild from structured fields over the original art (or live-text swap
-  where the PDF allows), with full-glyph fonts.
-- **Rulebook:** structured rebuild (HTML/CSS → PDF via Prince/Chrome/WeasyPrint) reconstructing
-  the layout, OR in-place font-fixed swap — **the spike decides** which is viable per fidelity bar.
+Strategy decided by **[Spike A](spike-pdf.md)** — per document type:
+- **Rulebook / manuals → in-place region-reflow:** erase each text region by painting the sampled
+  flat background (PyMuPDF redaction, `images=PDF_REDACT_IMAGE_NONE` keeps art), then reflow
+  translated PL into the region with `insert_textbox` (wrap + shrink-to-fit) in a PL-glyph font.
+  Preserves the bespoke design (panels, boxes, diagrams) for free. Region-level, never per-span.
+- **Cards → template rebuild from structured data:** bind translated fields from the Firestore
+  JSON (`army_units`/`tactical_cards`/`faction_cards`) into an HTML/CSS card template + render via
+  Prince/Chrome. In-place on cards is fragile (gradient/art backgrounds, tight boxes).
 - **Font strategy:** substitute SC display fonts (Aviano/Gineso) with PL-glyph-capable
   look-alikes (Oswald/Bebas/Barlow Condensed/DIN), embed full subsets.
 - **Interface out:** localized PDFs, reproducible from committed text + fetched sources.
@@ -56,8 +60,9 @@ the same machinery. Design favors small, independently-testable units with clear
 Spikes A and B are independent and can run in parallel; both gate the full design.
 
 ## Open questions (tracked as issues)
-- Achievable rulebook fidelity (rebuild vs in-place)?
-- CASC extraction on macOS — which tool works?
+- ~~Achievable rulebook fidelity (rebuild vs in-place)?~~ → resolved by [Spike A](spike-pdf.md):
+  rulebook = in-place region-reflow, cards = template rebuild.
+- CASC extraction on macOS — which tool works? (Spike B, in progress)
 - Commit boundary for intermediate files containing EN source text (currently: keep EN source
   local, commit target text + glossary).
 - Which documents are in v1 scope (rulebook + 3 P2P card sheets first?).
