@@ -94,36 +94,75 @@ def in_rect(bb, r):
     return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
 
 
-def derive_body(spans, block):
-    """Read the original body's layout from its prose spans (everything in the block that isn't a
-    translated label/header/pill). Returns geometry so the PL reflow matches the original exactly."""
+def to_logical(x, y, block, rot):
+    """Map a page point into the body's reading frame (identity for rot 0; 180deg about the block
+    centre for the upside-down front card) so one derivation handles both orientations."""
+    if rot == 0:
+        return x, y
+    cx, cy = (block[0]+block[2])/2, (block[1]+block[3])/2
+    return 2*cx - x, 2*cy - y
+
+
+def derive_body(spans, block, rot):
+    """Read the original body's layout (baseline, start-after-pills, wrap width, line spacing) from
+    its prose spans, in the reading frame, so the PL reflow matches the original by construction."""
     bs = [s for s in spans if in_rect(s["bb"], block) and s["t"] not in MAP]
     if not bs:
-        return None
-    base1 = min(s["org"][1] for s in bs)                       # first body line baseline
-    top = [s for s in bs if s["org"][1] - base1 < 1.5]
-    rest = [s for s in bs if s["org"][1] - base1 >= 1.5]
-    bl = sorted({round(s["org"][1], 1) for s in bs})
-    sizes = sorted(s["sz"] for s in bs)
-    return {
-        "start_x": min(s["org"][0] for s in top),             # where line 1 begins (after pills)
-        "left": min((s["org"][0] for s in rest), default=min(s["org"][0] for s in top)),
-        "right": max(s["bb"][2] for s in bs),
-        "base1": base1,
-        "last": max(s["org"][1] for s in bs),
-        "fs": sizes[len(sizes)//2],                            # original body font size (median)
+        return None, []
+    L = []
+    for s in bs:
+        lx, ly = to_logical(s["org"][0], s["org"][1], block, rot)
+        ax, _ = to_logical(s["bb"][0], s["bb"][1], block, rot)
+        bx, _ = to_logical(s["bb"][2], s["bb"][3], block, rot)
+        L.append((lx, ly, max(ax, bx), s["sz"]))               # logical origin x/y, right edge, size
+    base1 = min(p[1] for p in L)
+    top = [p for p in L if p[1]-base1 < 1.5]
+    rest = [p for p in L if p[1]-base1 >= 1.5]
+    bl = sorted({round(p[1], 1) for p in L})
+    sizes = sorted(p[3] for p in L)
+    g = {
+        "start_x": min(p[0] for p in top), "right": max(p[2] for p in L),
+        "left": min((p[0] for p in rest), default=min(p[0] for p in top)),
+        "base1": base1, "last": max(p[1] for p in L), "fs": sizes[len(sizes)//2],
         "spacing": (bl[1]-bl[0]) if len(bl) > 1 else sizes[len(sizes)//2]*1.2,
-        "bbox": fitz.Rect(min(s["bb"][0] for s in bs), min(s["bb"][1] for s in bs),
-                          max(s["bb"][2] for s in bs), max(s["bb"][3] for s in bs)),
     }
+    return g, bs
 
 
-def draw(page, s, text, key=None):
-    key = key or pick(s["font"]); boxw = s["bb"][2]-s["bb"][0]; fs = s["sz"]
+def containers(page):
+    """Filled banner-ish shapes, for fitting a value that overflows its original (shorter) slot."""
+    out = []
+    for d in page.get_drawings():
+        if d.get("fill") and d.get("type") in ("f", "fs"):
+            r = fitz.Rect(d["rect"])
+            if 14 < r.width < 130 and 8 < r.height < 32:
+                out.append(r)
+    return out
+
+
+def find_container(conts, bb):
+    cand = [r for r in conts if r.x0 <= bb[0]+1 and r.x1 >= bb[2]-1
+            and r.y0 <= bb[1]+2 and r.y1 >= bb[3]-2]
+    return min(cand, key=lambda r: r.width*r.height) if cand else None
+
+
+def draw(page, s, text, key=None, fit=None):
+    key = key or pick(s["font"]); rot = 0 if s["dir"] >= 0 else 180
+    if fit is not None:                       # PL overflows its slot -> fill + centre the container
+        fs = s["sz"]
+        while fs > 3.5 and FZ[key].text_length(text, fs) > fit.width*0.92:
+            fs -= 0.25
+        while FZ[key].text_length(text, fs+0.25) < fit.width*0.86 and fs < fit.height*0.82:
+            fs += 0.25
+        tw = FZ[key].text_length(text, fs)
+        page.insert_text((fit.x0 + (fit.width-tw)/2, fit.y0 + fit.height/2 + fs*0.34), text,
+                         fontsize=fs, fontname=key, fontfile=FPATH[key], color=rgb(s["c"]), rotate=rot)
+        return
+    boxw = s["bb"][2]-s["bb"][0]; fs = s["sz"]
     while fs > 3.5 and FZ[key].text_length(text, fs) > boxw * 1.04:
         fs -= 0.25
     page.insert_text(fitz.Point(s["org"]), text, fontsize=fs, fontname=key, fontfile=FPATH[key],
-                     color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
+                     color=rgb(s["c"]), rotate=rot)
 
 
 def draw_pill(page, s, text):
@@ -149,20 +188,31 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                     spans.append({"t": s["text"].strip(), "bb": s["bbox"], "org": s["origin"],
                                   "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
 
-    ab_rects = [a["block"] for a in ABILITIES]
     targets = [s for s in spans if s["t"] in MAP]
-    redact = [list(r) for r in ab_rects]
+    conts = containers(page)
+    abil = [(a, *derive_body(spans, a["block"], a["rot"])) for a in ABILITIES]
+    body_ids = {id(s) for (_, _, bs) in abil for s in bs}
+
+    # Redact ONLY what we replace: translated labels + ability prose. NOT whole blocks — that would
+    # catch phase-bar icons (e.g. the upgrade arrow) and redraw them in the wrong font.
+    redact = []
     for s in targets:
         x0, y0, x1, y1 = s["bb"]
         if s["sz"] < 5.5:  # tiny stat label over a big number -> don't reach the number
             y1 = y0 + (y1-y0)*0.45
         redact.append([x0, y0, x1, y1])
-    collateral = [s for s in spans if s not in targets
-                  and not any(in_rect(s["bb"], r) for r in ab_rects)
-                  and any(fitz.Rect(s["bb"]).intersects(fitz.Rect(r)) for r in redact)]
-    seen = set(); collateral = [s for s in collateral
-                                if (s["t"], round(s["org"][0]), round(s["org"][1])) not in seen
-                                and not seen.add((s["t"], round(s["org"][0]), round(s["org"][1])))]
+    redact += [list(s["bb"]) for (_, _, bs) in abil for s in bs]
+    collateral, seen = [], set()
+    for s in spans:
+        if s in targets or id(s) in body_ids:
+            continue
+        if any(ord(c) > 0x2000 for c in s["t"]):               # symbols/icons -> leave to the art
+            continue
+        if not any(fitz.Rect(s["bb"]).intersects(fitz.Rect(r)) for r in redact):
+            continue
+        k = (s["t"], round(s["org"][0]), round(s["org"][1]))
+        if k not in seen:
+            seen.add(k); collateral.append(s)
 
     for r in redact:
         page.add_redact_annot(fitz.Rect(r))
@@ -170,27 +220,33 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           graphics=fitz.PDF_REDACT_LINE_ART_NONE,
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
-    for a in ABILITIES:
-        g = derive_body(spans, a["block"])
+    for a, g, bs in abil:                                      # bodies (rich text -> bold keywords)
         if not g:
             continue
-        fs = g["fs"]
-        if a["rot"] == 0:  # full derivation: baseline-aligned, start after pills, original spacing
-            lh = max(1.0, g["spacing"]/fs)
-            y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line-1 on base1
-            rect = fitz.Rect(g["left"]-0.5, y0, g["right"]+1, g["last"]+fs+2)
-            indent = g["start_x"] - g["left"]
-            html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
-                    f'line-height:{lh:.3f}">{a["html"]}</div>')
-        else:              # rotated front: fill the original body bbox
-            rect = g["bbox"] + (-0.5, -0.5, 1, 1)
-            html = f'<div style="font-size:{fs:.1f}pt">{a["html"]}</div>'
+        fs = g["fs"]; lh = max(1.0, g["spacing"]/fs)
+        y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line 1 on the original baseline
+        lrect = (g["left"]-0.5, y0, g["right"]+1, g["last"]+fs+2)
+        if a["rot"] == 0:
+            rect = fitz.Rect(lrect)
+        else:                                                  # transform the logical rect to page
+            cx, cy = (a["block"][0]+a["block"][2])/2, (a["block"][1]+a["block"][3])/2
+            rect = fitz.Rect(2*cx-lrect[2], 2*cy-lrect[3], 2*cx-lrect[0], 2*cy-lrect[1])
+        indent = g["start_x"] - g["left"]
+        html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
+                f'line-height:{lh:.3f}">{a["html"]}</div>')
         page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
         draw(page, s, s["t"])
     for s in targets:
         pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
-        draw_pill(page, s, pl) if s["t"] in PILLS else draw(page, s, pl)
+        if s["t"] in PILLS:
+            draw_pill(page, s, pl); continue
+        fit = None                                             # grow into the banner if PL overflows
+        if FZ[pick(s["font"])].text_length(pl, s["sz"]) > (s["bb"][2]-s["bb"][0])*1.12:
+            c = find_container(conts, s["bb"])
+            if c and c.width > (s["bb"][2]-s["bb"][0])*1.3:
+                fit = c
+        draw(page, s, pl, fit=fit)
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
