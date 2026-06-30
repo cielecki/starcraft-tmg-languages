@@ -105,6 +105,17 @@ def pick(font):
     return "reg"
 
 
+def is_icon_span(t):
+    """A symbol/icon glyph span (left to the art on redaction; never body prose). True only when the
+    span is PREDOMINANTLY high-codepoint glyphs — a single typographic apostrophe '’' (U+2019) in an
+    ordinary word like \"Unit's\" must NOT disqualify it (that bit the body-prose filter once)."""
+    glyphs = [c for c in t if not c.isspace()]
+    if not glyphs:
+        return False
+    hi = sum(1 for c in glyphs if ord(c) > 0x2000 and c not in "’‘“”—–…")
+    return hi >= max(1, len(glyphs)) and hi / len(glyphs) > 0.5
+
+
 def in_rect(bb, r):
     cx, cy = (bb[0]+bb[2])/2, (bb[1]+bb[3])/2
     return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
@@ -132,10 +143,12 @@ def to_logical(x, y, block, rot):
     return 2*cx - x, 2*cy - y
 
 
-def derive_body(spans, block, rot):
+def derive_body(bs, block, rot):
     """Read the original body's layout (baseline, start-after-pills, wrap width, line spacing) from
-    its prose spans, in the reading frame, so the PL reflow matches the original by construction."""
-    bs = [s for s in spans if in_rect(s["bb"], block) and not is_not_body(s)]
+    its prose spans, in the reading frame, so the PL reflow matches the original by construction.
+    `bs` is the list of prose spans already ASSIGNED to this ability (detect_abilities/_assign_bodies);
+    no in-rect re-filtering — text-flow membership is the source of truth so neighbouring columns and
+    attack-table rows that merely share a panel are never swept in."""
     if not bs:
         return None, []
     L = []
@@ -175,51 +188,122 @@ def find_container(conts, bb):
     return min(cand, key=lambda r: r.width*r.height) if cand else None
 
 
-def _ability_panel(page, hx, hy):
-    """The filled vector panel that frames an ability block. Prefer the TIGHTEST filled rect whose
-    centre region contains the header point — the grey #dadad9 sub-panel on side-by-side back-card
-    abilities, or the white panel that wraps a full-width front-card ability. Excludes the
-    page-background fill (huge) and skinny icon chips (too small)."""
+def _logical_box(s, cx, cy, rot):
+    """A span's [x0,y0,x1,y1] mapped into the reading frame (180deg about cx,cy for rot 180)."""
+    if rot == 0:
+        return list(s["bb"])
+    return [2*cx - s["bb"][2], 2*cy - s["bb"][3], 2*cx - s["bb"][0], 2*cy - s["bb"][1]]
+
+
+def _header_panel_x(page, hx, hy):
+    """If a SMALL filled panel (grey #dadad9 sub-panel or a narrow white card cell) tightly encloses
+    the header point, return its (x0,x1) — the exact body column for side-by-side abilities. Skips
+    the page background and full-card panels (too wide to disambiguate columns)."""
     best = None
     for d in page.get_drawings():
         f = d.get("fill")
         if not f or d.get("type") not in ("f", "fs"):
             continue
         r = fitz.Rect(d["rect"])
-        if not (r.x0-1 <= hx <= r.x1+1 and r.y0-1 <= hy <= r.y1+1):
+        if r.x0-1 <= hx <= r.x1+1 and r.y0-1 <= hy <= r.y1+1 and 40 < r.width < 300 and 12 < r.height < 220:
+            if best is None or r.get_area() < best.get_area():
+                best = r
+    return (best.x0, best.x1) if best is not None else None
+
+
+def _assign_bodies(spans, page=None):
+    """Assign each PROSE span (not a header / pill / phase / icon) to the ability HEADER it flows
+    from, so a block is bounded by its OWN running text — never a neighbouring ability's column nor
+    the attack-table rows that merely share a panel.
+
+    The body of an ability is the contiguous run of prose LINES starting on the header line and
+    flowing DOWN until a vertical GAP bigger than a line (the attack table, the next ability, the
+    footer). Worked entirely in each header's own logical reading frame (pivot = header centre) so
+    rot-180 front cards read top-to-bottom too. Returns {id(header_span): [member prose spans]}."""
+    headers = [s for s in spans if is_header_span(s)]
+    members = {id(h): [] for h in headers}
+    prose = [s for s in spans
+             if not is_header_span(s) and not is_not_body(s) and not is_icon_span(s["t"])]
+
+    def hbox(h):  # header logical box in its OWN frame (pivot = header centre)
+        cx = (h["bb"][0]+h["bb"][2])/2; cy = (h["bb"][1]+h["bb"][3])/2
+        rot = 0 if h["dir"] >= 0 else 180
+        return cx, cy, rot, _logical_box(h, cx, cy, rot)
+
+    # Reading order = block order (front card first, then top-to-bottom, then left-to-right). Each
+    # ability greedily CONSUMES its contiguous lines so a neighbour can't re-grab them.
+    order = sorted(headers, key=lambda h: (0 if h["dir"] < 0 else 1,
+                                           round((h["bb"][1]+h["bb"][3])/2, 1), round(h["bb"][0], 1)))
+    consumed = set()
+    for h in order:
+        cx, cy, rot, hlb = hbox(h)
+        hx0, hx1, htop, hby = hlb[0], hlb[2], hlb[1], hlb[3]
+        hcx = (hx0+hx1)/2
+        # COLUMN bounds: prefer the EXACT column of a small filled panel enclosing the header (the grey
+        # side-by-side sub-panel). Else, if another header shares this header's line (side-by-side
+        # abilities), split at the midpoint to that neighbour. Else span the card width.
+        col_l, col_r = hcx-260, hcx+260
+        px = _header_panel_x(page, (h["bb"][0]+h["bb"][2])/2, (h["bb"][1]+h["bb"][3])/2) if page else None
+        if px is not None:
+            lx = [2*cx-px[1], 2*cx-px[0]] if rot == 180 else [px[0], px[1]]  # panel x in logical frame
+            col_l, col_r = min(lx)-3, max(lx)+3
+        else:
+            for o in headers:
+                if o is h or o["dir"] != h["dir"]:
+                    continue
+                ob = _logical_box(o, cx, cy, rot); ocy = (ob[1]+ob[3])/2; ocx = (ob[0]+ob[2])/2
+                if abs(ocy - (htop+hby)/2) < 9:                 # same line -> a side-by-side neighbour
+                    if ocx > hcx:
+                        col_r = min(col_r, (hcx+ocx)/2)
+                    else:
+                        col_l = max(col_l, (hcx+ocx)/2)
+        # candidate prose: unconsumed, same dir, at/below header top, inside the column
+        cand = []
+        for s in prose:
+            if id(s) in consumed or s["dir"] != h["dir"]:
+                continue
+            sb = _logical_box(s, cx, cy, rot); scy = (sb[1]+sb[3])/2; scx = (sb[0]+sb[2])/2
+            if scy < htop - 6 or not (col_l <= scx <= col_r):
+                continue
+            cand.append((scy, s))
+        cand.sort(key=lambda t: t[0])
+        if not cand:
             continue
-        if not (40 < r.width < 360 and 14 < r.height < 70):     # panel-shaped, not bg / not a chip
-            continue
-        if best is None or r.get_area() < best.get_area():
-            best = r
-    return best
+        sizes = sorted(s["sz"] for _, s in cand)
+        lh = sizes[len(sizes)//2] * 1.7
+        prev = hby
+        for scy, s in cand:
+            if scy - prev > lh + 4:                             # vertical gap -> the body has ended
+                break
+            members[id(h)].append(s); consumed.add(id(s))
+            prev = max(prev, scy)
+    return members, None
 
 
 def detect_abilities(page, spans):
     """AUTO-DETECT the ability blocks on a page (replaces the hardcoded ABILITIES list).
 
-    Anchor = the ability HEADER span (is_header_span). For each header: the block rect is the
-    enclosing filled panel (grey or white); its reading direction gives the orientation
-    (rot 180 for the upside-down front card dir=-1, rot 0 for the back card dir=+1). If no panel
-    encloses the header, fall back to the bounding box of the header + same-orientation prose
-    spans clustered just below it. Blocks are returned in reading order (front card first, then
-    top-to-bottom, then left-to-right) so block_index is stable for the JSONL body id."""
+    Anchor = the ability HEADER span (is_header_span) — the unique CondensedExtraBold UPPERCASE
+    colon-label; every other colon-label uses a different font. Each header's reading direction
+    gives the orientation (rot 180 for the upside-down front card dir=-1, rot 0 for the back card
+    dir=+1). The BODY of a header is the prose assigned to it by text flow (_assign_bodies), and the
+    block rect is the bounding box of the header + that body — so it works on full-width single-
+    ability cards (Adept), side-by-side panels, AND dense multi-ability tactical cards alike. Blocks
+    come back in reading order (front card first, then top-to-bottom, then left-to-right) so
+    block_index is stable for the JSONL body id."""
+    members, _ = _assign_bodies(spans, page)
     out = []
     for h in spans:
         if not is_header_span(h):
             continue
-        hx, hy = (h["bb"][0]+h["bb"][2])/2, (h["bb"][1]+h["bb"][3])/2
         rot = 0 if h["dir"] >= 0 else 180
-        panel = _ability_panel(page, hx, hy)
-        if panel is not None:
-            block = [panel.x0, panel.y0, panel.x1, panel.y1]
-        else:                                                   # no filled panel -> span-bbox union
-            near = [s for s in spans if s["dir"] == h["dir"]
-                    and abs(s["bb"][0]-h["bb"][0]) < 240 and -2 <= (s["bb"][1]-h["bb"][1]) <= 26]
-            xs = [v for s in near for v in (s["bb"][0], s["bb"][2])]
-            ys = [v for s in near for v in (s["bb"][1], s["bb"][3])]
-            block = [min(xs)-2, min(ys)-2, max(xs)+2, max(ys)+2]
-        out.append({"block": block, "rot": rot, "header": h["t"],
+        body = members[id(h)]
+        xs = [v for s in [h]+body for v in (s["bb"][0], s["bb"][2])]
+        ys = [v for s in [h]+body for v in (s["bb"][1], s["bb"][3])]
+        block = [min(xs)-2, min(ys)-2, max(xs)+2, max(ys)+2]
+        hy = (h["bb"][1]+h["bb"][3])/2
+        out.append({"block": block, "rot": rot, "header": h["t"], "_h": h,
+                    "_body": body,
                     "_sort": (0 if h["dir"] < 0 else 1, round(hy, 1), round(h["bb"][0], 1))})
     out.sort(key=lambda a: a["_sort"])
     for i, a in enumerate(out):
@@ -323,7 +407,7 @@ def render_page(src, page_no, lang, by_source, by_id, doc_key):
     # Attach derived geometry + the PL body (from JSONL by id) to each detected block.
     derived = []
     for a in abil:
-        g, bs = derive_body(spans, a["block"], a["rot"])
+        g, bs = derive_body(a["_body"], a["block"], a["rot"])
         seg = by_id.get(f"{doc_key}:p{page_no}:ability:{a['index']}")
         derived.append((a, g, bs, seg))
     # Only blocks WITH a translation are redrawn; the rest keep their EN prose untouched.
