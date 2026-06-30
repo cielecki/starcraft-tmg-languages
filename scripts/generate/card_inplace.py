@@ -36,11 +36,14 @@ MAP = {
     "Surge type": "Typ naw.", "S Dice": "K naw.", "Dmg": "Obr", "Keyword": "Słowo kl.",
     "STRIKE": "UDERZENIE", "GLAIVE STRIKE": "UDERZ. GLEWIĄ", "GLAIVE CANNON": "DZIAŁO GLEWII",
     "Ground": "Naziem.", "Light": "Lekki", "All": "Wsz.",
-    "PIERCE Light (2)": "PRZEBICIE Lekki (2)", "ANTI-EVADE (1)": "ANTY-UNIK (1)",
+    "PIERCE Light (2)": "PRZEBICIE Lekki (2)", "ANTI-EVADE (1)": "ANTY-UNIK (1)", "FOR": "DLA",
     # ability headers (kept in place; bodies reflow separately)
     "RESONATING GLAVES:": "REZONUJĄCE GLEWIE:", "GUIDANCE:": "NAPROWADZANIE:",
     "PSIONIC TRANSFER:": "PSIONICZNY TRANSFER:", "PSIONIC PRESENCE:": "PSIONICZNA OBECNOŚĆ:",
 }
+
+# Position-keyed overrides (round(x0),round(y0)) -> PL, for context-dependent grammar.
+OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA" (genitive)
 
 # Ability bodies: redact the whole block rect, reflow the PL body into `body` (padded, clear of
 # the header/pill line); header+pills are reinserted on top via MAP. rot: 0 normal, 180 front.
@@ -121,7 +124,8 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
         draw_label(page, s["org"], s["t"], s["sz"], rgb(s["c"]), s["dir"], s["bb"][2]-s["bb"][0])
     # 3) translated labels + pills + headers, on top
     for s in targets:
-        draw_label(page, s["org"], MAP[s["t"]], s["sz"], rgb(s["c"]), s["dir"], s["bb"][2]-s["bb"][0])
+        pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
+        draw_label(page, s["org"], pl, s["sz"], rgb(s["c"]), s["dir"], s["bb"][2]-s["bb"][0])
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
