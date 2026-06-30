@@ -24,11 +24,12 @@ FACE = {"reg": "NotoSansCond-Regular.ttf", "med": "NotoSansCond-Medium.ttf",
 FPATH = {k: str(FDIR / v) for k, v in FACE.items()}
 FZ = {k: fitz.Font(fontfile=p) for k, p in FPATH.items()}
 ARCHIVE = fitz.Archive(str(FDIR))
+# distinct FAMILIES (not font-weight) — PyMuPDF's HTML engine won't pick @font-face by weight
 BODY_CSS = """
-@font-face { font-family: NC; font-weight: 500; src: url("NotoSansCond-Medium.ttf"); }
-@font-face { font-family: NC; font-weight: 800; src: url("NotoSansCond-ExtraBold.ttf"); }
-* { font-family: NC; font-weight: 500; color: #000000; margin: 0; padding: 0; line-height: 1.0; }
-b { font-weight: 800; }
+@font-face { font-family: NCr; src: url("NotoSansCond-Medium.ttf"); }
+@font-face { font-family: NCb; src: url("NotoSansCond-ExtraBold.ttf"); }
+* { font-family: NCr; color: #000000; margin: 0; padding: 0; line-height: 1.02; }
+b { font-family: NCb; }
 """
 
 MAP = {
@@ -54,14 +55,17 @@ MAP = {
 OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA"
 PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
 
-ABILITIES = [  # HTML body (bold keywords), reflowed clear of the header/pill line
-    {"rect": [189, 476, 349, 497], "body": [196, 486, 346, 498], "rot": 0,
+# block = full ability rect (redacted to clear original). body = reflow rect (starts on the header
+# line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
+# width below — matching the original. rot 180 (front) keeps indent 0 (rotated-flow indent is wrong-side).
+ABILITIES = [
+    {"block": [189, 476, 349, 497], "body": [192, 477, 347, 499], "indent": 104, "rot": 0,
      "html": "<b>Działo glewii</b> tej jednostki zyskuje <b>WZMOCNIENIE RoA (1)</b>."},
-    {"rect": [351, 476, 489, 497], "body": [358, 486, 487, 498], "rot": 0,
+    {"block": [351, 476, 489, 497], "body": [354, 477, 487, 499], "indent": 60, "rot": 0,
      "html": "Broń dystansowa <b>Działa glewii</b> tej jednostki zyskuje <b>ANTY-UNIK (2)</b>."},
-    {"rect": [85, 313, 421, 348], "body": [88, 314, 320, 334], "rot": 180,
+    {"block": [85, 313, 421, 348], "body": [88, 314, 320, 347], "indent": 0, "rot": 180,
      "html": "Umieść żeton <b>Cienia</b> całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton <b>Cienia</b> jako model prowadzący. Żeton ma <b>PRZEMIESZCZENIE</b>."},
-    {"rect": [85, 352, 421, 376], "body": [88, 353, 320, 372], "rot": 180,
+    {"block": [85, 352, 421, 376], "body": [88, 353, 320, 375], "indent": 0, "rot": 180,
      "html": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu <b>Cienia</b> zyskują <b>PRECYZJĘ (1)</b>."},
 ]
 
@@ -118,7 +122,7 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                     spans.append({"t": s["text"].strip(), "bb": s["bbox"], "org": s["origin"],
                                   "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
 
-    ab_rects = [a["rect"] for a in ABILITIES]
+    ab_rects = [a["block"] for a in ABILITIES]
     targets = [s for s in spans if s["t"] in MAP]
     redact = [list(r) for r in ab_rects]
     for s in targets:
@@ -140,8 +144,11 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
     for a in ABILITIES:
-        page.insert_htmlbox(fitz.Rect(a["body"]), f'<div style="font-size:6.6pt">{a["html"]}</div>',
-                            css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
+        html = f'<div style="text-indent:{a["indent"]}px;font-size:6.6pt">{a["html"]}</div>'
+        _, scale = page.insert_htmlbox(fitz.Rect(a["body"]), html, css=BODY_CSS, archive=ARCHIVE,
+                                       rotate=a["rot"])
+        if scale < 0.99:
+            print(f"  body scaled {scale:.2f} (indent may drift) block={a['block']}")
     for s in collateral:
         draw(page, s, s["t"])
     for s in targets:
