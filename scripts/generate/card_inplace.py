@@ -13,8 +13,19 @@ Other principles (from the visual-bug passes):
     lands off their baked shadow and doubles glyphs (the "/" in 5/8). Numbers stay pristine.
   - Abilities = name + colour pills + body with BOLD keywords. Pills: translate, bold, centred.
     Body: reflow as rich text (insert_htmlbox) so keywords stay bold.
+
+GENERALIZED (works on ANY P2P card sheet, not just the Adept):
+  - Ability BLOCKS are auto-detected per page (detect_abilities): the header span is the anchor
+    (NotoSans-CondensedExtraBold, UPPERCASE, ends ':', ~7pt — uniquely the ability name; every
+    other colon-label uses a different font), the enclosing filled panel rect is the block, and
+    its reading direction (front card dir=-1 rotated 180; back card dir=+1) gives the orientation.
+  - Translations come from an EXTERNAL segments JSONL (data/segments/<doc>.jsonl), not hardcoded:
+    labels/headers/pills/cells looked up by (doc, source_text)->target_text; BODIES by id
+    "<doc>:p<page>:ability:<block_index>". Missing segment -> leave the original EN (never crash).
+  - Layout TREATMENT (grow-into-free-space / centred-banner / fit-own-slot) is structural and stays
+    keyed off the EN source text (PHASES/CENTERED) since it is language-independent.
 """
-import sys, fitz
+import sys, json, argparse, fitz
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -32,34 +43,25 @@ BODY_CSS = """
 b { font-family: NCb; }
 """
 
-MAP = {
-    "PROTOSS FACTION": "FRAKCJA PROTOSÓW", "UNIT CARDS": "KARTY JEDNOSTEK",
-    "PROTOSS": "PROTOSI", "CORE": "PODSTAWOWA", "DAMAGE DEALER": "ZADAJĄCY OBRAŻENIA",
-    "COMBAT ROLE:": "ROLA BOJOWA:", "ARMY SLOT:": "SLOT ARMII:",
-    "CLOSE COMBAT": "WALKA WRĘCZ", "RANGED COMBAT": "WALKA DYST.",
-    "COMBAT TAGS:": "CECHY BOJOWE:", "BIOLOGICAL, LIGHT, GROUND": "BIOLOGICZNY, LEKKI, NAZIEMNY",
-    "COMBAT PHASE": "FAZA WALKI", "ASSAULT PHASE": "FAZA SZTURMU",
-    "MOVEMENT PHASE": "FAZA RUCHU", "ANY PHASE": "DOWOLNA FAZA",
-    "UPGRADE": "ULEPSZENIE", "U P G R A D E": "ULEPSZENIE",
-    "ACTIVE": "AKTYWNA", "PASSIVE": "PASYWNA", "1 PE": "1 EP",
-    "SIZE": "ROZMIAR", "HIT POINTS": "PKT ŻYCIA", "EVADE": "UNIK", "ARMOUR": "PANCERZ",
-    "SPEED": "SZYBKOŚĆ", "SHIELD": "OSŁONA", "MODELS / SUPPLY": "MODELE / ZAOPATRZ.",
-    "NAME": "NAZWA", "RNG": "ZAS", "Target": "Cel", "RoA": "SA", "Hit": "Traf",
-    "Surge type": "Typ naw.", "S Dice": "K naw.", "Dmg": "Obr", "Keyword": "Słowo kl.",
-    "STRIKE": "UDERZENIE", "GLAIVE STRIKE": "UDERZ. GLEWIĄ", "GLAIVE CANNON": "DZIAŁO GLEWII",
-    "Ground": "Naziem.", "Light": "Lekki", "All": "Wsz.",
-    "PIERCE Light (2)": "PRZEBICIE Lekki (2)", "ANTI-EVADE (1)": "ANTY-UNIK (1)", "FOR": "DLA",
-    "RESONATING GLAVES:": "REZONUJĄCE GLEWIE:", "GUIDANCE:": "NAPROWADZANIE:",
-    "PSIONIC TRANSFER:": "PSIONICZNY TRANSFER:", "PSIONIC PRESENCE:": "PSIONICZNA OBECNOŚĆ:",
-}
-OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA"
-PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
+# ── Structural layout classes (EN-source-keyed, LANGUAGE-INDEPENDENT) ──────────────────────────
+# These say HOW a span is laid out, not what it translates to. They recur on every sheet, so they
+# stay hardcoded on the EN side while the actual translations come from the external segments JSONL.
+OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA" (positional disambig.)
+PILLS = {"ACTIVE", "PASSIVE", "1 PE"}                         # ability mode pills -> draw_pill
 # Genuinely centred in a box/banner -> container-fit. Everything else is LEFT-aligned and grows
 # rightward into free space (centring a left-aligned bar label shoves it onto its icon, e.g. UPGRADE).
 CENTERED = {"CORE", "DAMAGE DEALER"}
-HEADERS = {"RESONATING GLAVES:", "GUIDANCE:", "PSIONIC TRANSFER:", "PSIONIC PRESENCE:"}
+# Phase-bar / upgrade-bar labels: left-aligned, grow rightward into free bar space.
 PHASES = {"COMBAT PHASE", "ASSAULT PHASE", "MOVEMENT PHASE", "ANY PHASE", "UPGRADE", "U P G R A D E"}
-NOT_BODY = HEADERS | PILLS | PHASES                            # drawn separately; never body prose
+
+
+def is_header_span(s):
+    """An ability HEADER: the unique NotoSans-CondensedExtraBold UPPERCASE colon-label (~7pt). Every
+    OTHER colon-uppercase label on the sheet (COMBAT TAGS:, MISSION PARAMETERS:, GATHER ACTION: …)
+    uses a different font (Geogrotesque-Md / CondensedBlack / CondensedBold), so this is exact."""
+    t = s["t"]
+    return ("CondensedExtraB" in s["font"] and t.endswith(":") and t == t.upper()
+            and len(t) > 3 and any(c.isalpha() for c in t) and 5.5 < s["sz"] < 9)
 
 # Glossary KEYWORDS — bolded automatically wherever they occur in a body (the source bolds these
 # game terms; deriving from a keyword list instead of hand-marking <b> means we never miss one).
@@ -80,22 +82,11 @@ def auto_bold(text):
         text = text.replace(f"\x00{i}\x01", f"<b>{kw}</b>")
     return text
 
-# block = full ability rect (redacted to clear original). body = reflow rect (starts on the header
-# line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
-# width below — matching the original. rot 180 (front) keeps indent 0 (rotated-flow indent is wrong-side).
-# Only the structural facts: which rect is an ability block, its orientation, and the PL body
-# (bold keywords marked). The body's geometry — baseline, start-after-pills, wrap width, line
-# spacing — is DERIVED from the original body spans (derive_body), not hand-measured.
-ABILITIES = [  # plain PL text; bold is applied automatically from KEYWORDS (no hand-marked <b>)
-    {"block": [189, 476, 349, 497], "rot": 0,
-     "body": "Działo glewii tej jednostki zyskuje WZMOCNIENIE RoA (1)."},
-    {"block": [351, 476, 489, 497], "rot": 0,
-     "body": "Broń dystansowa Działa glewii tej jednostki zyskuje ANTY-UNIK (2)."},
-    {"block": [85, 313, 421, 348], "rot": 180,
-     "body": "Umieść żeton Cienia całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele tej jednostki w spójności, traktując żeton Cienia jako model prowadzący. Żeton Cienia ma PRZEMIESZCZENIE."},
-    {"block": [85, 352, 421, 376], "rot": 180,
-     "body": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu Cienia zyskują PRECYZJĘ (1)."},
-]
+def is_not_body(s):
+    """True for spans that are drawn SEPARATELY (header / pill / phase label) and so must never be
+    swept into a body's prose reflow. Replaces the old hardcoded NOT_BODY text set: the ability
+    header is now recognised structurally (is_header_span), so this works for every sheet."""
+    return is_header_span(s) or s["t"] in PILLS or s["t"] in PHASES
 
 
 def rgb(c):
@@ -144,7 +135,7 @@ def to_logical(x, y, block, rot):
 def derive_body(spans, block, rot):
     """Read the original body's layout (baseline, start-after-pills, wrap width, line spacing) from
     its prose spans, in the reading frame, so the PL reflow matches the original by construction."""
-    bs = [s for s in spans if in_rect(s["bb"], block) and s["t"] not in NOT_BODY]
+    bs = [s for s in spans if in_rect(s["bb"], block) and not is_not_body(s)]
     if not bs:
         return None, []
     L = []
@@ -184,6 +175,102 @@ def find_container(conts, bb):
     return min(cand, key=lambda r: r.width*r.height) if cand else None
 
 
+def _ability_panel(page, hx, hy):
+    """The filled vector panel that frames an ability block. Prefer the TIGHTEST filled rect whose
+    centre region contains the header point — the grey #dadad9 sub-panel on side-by-side back-card
+    abilities, or the white panel that wraps a full-width front-card ability. Excludes the
+    page-background fill (huge) and skinny icon chips (too small)."""
+    best = None
+    for d in page.get_drawings():
+        f = d.get("fill")
+        if not f or d.get("type") not in ("f", "fs"):
+            continue
+        r = fitz.Rect(d["rect"])
+        if not (r.x0-1 <= hx <= r.x1+1 and r.y0-1 <= hy <= r.y1+1):
+            continue
+        if not (40 < r.width < 360 and 14 < r.height < 70):     # panel-shaped, not bg / not a chip
+            continue
+        if best is None or r.get_area() < best.get_area():
+            best = r
+    return best
+
+
+def detect_abilities(page, spans):
+    """AUTO-DETECT the ability blocks on a page (replaces the hardcoded ABILITIES list).
+
+    Anchor = the ability HEADER span (is_header_span). For each header: the block rect is the
+    enclosing filled panel (grey or white); its reading direction gives the orientation
+    (rot 180 for the upside-down front card dir=-1, rot 0 for the back card dir=+1). If no panel
+    encloses the header, fall back to the bounding box of the header + same-orientation prose
+    spans clustered just below it. Blocks are returned in reading order (front card first, then
+    top-to-bottom, then left-to-right) so block_index is stable for the JSONL body id."""
+    out = []
+    for h in spans:
+        if not is_header_span(h):
+            continue
+        hx, hy = (h["bb"][0]+h["bb"][2])/2, (h["bb"][1]+h["bb"][3])/2
+        rot = 0 if h["dir"] >= 0 else 180
+        panel = _ability_panel(page, hx, hy)
+        if panel is not None:
+            block = [panel.x0, panel.y0, panel.x1, panel.y1]
+        else:                                                   # no filled panel -> span-bbox union
+            near = [s for s in spans if s["dir"] == h["dir"]
+                    and abs(s["bb"][0]-h["bb"][0]) < 240 and -2 <= (s["bb"][1]-h["bb"][1]) <= 26]
+            xs = [v for s in near for v in (s["bb"][0], s["bb"][2])]
+            ys = [v for s in near for v in (s["bb"][1], s["bb"][3])]
+            block = [min(xs)-2, min(ys)-2, max(xs)+2, max(ys)+2]
+        out.append({"block": block, "rot": rot, "header": h["t"],
+                    "_sort": (0 if h["dir"] < 0 else 1, round(hy, 1), round(h["bb"][0], 1))})
+    out.sort(key=lambda a: a["_sort"])
+    for i, a in enumerate(out):
+        a["index"] = i
+        del a["_sort"]
+    return out
+
+
+def load_segments(path, doc):
+    """Read a segments JSONL into two lookups. Missing file -> empty (engine falls back to EN).
+      by_source[(doc, source_text)] = target_text   (labels / headers / pills / cells)
+      by_id[id]                     = {target_text, bold}   (bodies, id '<doc>:p<page>:ability:<i>')
+    Only rows with a non-empty target_text are indexed, so an untranslated row falls back to EN."""
+    by_source, by_id = {}, {}
+    p = Path(path)
+    if not p.exists():
+        return by_source, by_id
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        r = json.loads(line)
+        tgt = (r.get("target_text") or "").strip()
+        if not tgt:
+            continue
+        if r.get("kind") == "body":
+            by_id[r["id"]] = {"target_text": r["target_text"], "bold": r.get("bold") or []}
+        else:
+            by_source[(r.get("doc", doc), r.get("source_text", ""))] = r["target_text"]
+    return by_source, by_id
+
+
+def apply_bold(text, ranges):
+    """Wrap explicit [start,end) char ranges of `text` in <b>…</b> (HTML-escaping the plain parts).
+    Used for body segments whose bold spans are given as char ranges in the JSONL."""
+    import html as _html
+    if not ranges:
+        return _html.escape(text)
+    cuts = sorted(((max(0, a), min(len(text), b)) for a, b in ranges), key=lambda r: r[0])
+    out, pos = [], 0
+    for a, b in cuts:
+        if b <= pos:
+            continue
+        a = max(a, pos)
+        out.append(_html.escape(text[pos:a]))
+        out.append("<b>" + _html.escape(text[a:b]) + "</b>")
+        pos = b
+    out.append(_html.escape(text[pos:]))
+    return "".join(out)
+
+
 def draw(page, s, text, key=None, fit=None, avail=None):
     key = key or pick(s["font"]); rot = 0 if s["dir"] >= 0 else 180
     if fit is not None:                       # PL overflows its slot -> fill + centre the container
@@ -213,8 +300,13 @@ def draw_pill(page, s, text, dx=0):
                      color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
 
 
-def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"):
-    page_no = int(page_no)
+def doc_slug(src):
+    """The <doc> key used in segment ids / lookups: the PDF stem (matches data/segments/<doc>.jsonl)."""
+    return Path(src).stem
+
+
+def render_page(src, page_no, lang, by_source, by_id, doc_key):
+    """Localize ONE page in place and write the PDF + PNG. Returns a small stats dict."""
     doc = fitz.open(ROOT / "sources/pdf" / src)
     page = doc[page_no]
     spans = []
@@ -227,11 +319,26 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                                   "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
 
     conts = containers(page)
-    abil = [(a, *derive_body(spans, a["block"], a["rot"])) for a in ABILITIES]
-    body_ids = {id(s) for (_, _, bs) in abil for s in bs}
-    # a span inside an ability body is never a standalone target (even if it matches MAP, e.g. "All"
-    # -> "Wsz."): the body reflow handles it. Otherwise it gets drawn twice.
-    targets = [s for s in spans if s["t"] in MAP and id(s) not in body_ids]
+    abil = detect_abilities(page, spans)                        # AUTO-DETECT (was hardcoded ABILITIES)
+    # Attach derived geometry + the PL body (from JSONL by id) to each detected block.
+    derived = []
+    for a in abil:
+        g, bs = derive_body(spans, a["block"], a["rot"])
+        seg = by_id.get(f"{doc_key}:p{page_no}:ability:{a['index']}")
+        derived.append((a, g, bs, seg))
+    # Only blocks WITH a translation are redrawn; the rest keep their EN prose untouched.
+    body_ids = {id(s) for (_, _, bs, seg) in derived if seg for s in bs}
+
+    def lookup(s):
+        # A span is translatable only if the JSONL has its source_text. OVERRIDES is a POSITIONAL
+        # disambiguation of an already-translated span (e.g. one specific "FOR" -> "DLA UDERZENIA"),
+        # never a standalone source — so it only re-maps when by_source already matched.
+        base = by_source.get((doc_key, s["t"]))
+        if base is None:
+            return None
+        return OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or base
+    # A target is any span with a translation (and not consumed by an ability-body reflow).
+    targets = [s for s in spans if lookup(s) is not None and id(s) not in body_ids]
 
     # Redact ONLY what we replace: translated labels + ability prose. NOT whole blocks — that would
     # catch phase-bar icons (e.g. the upgrade arrow) and redraw them in the wrong font.
@@ -241,7 +348,7 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
         if s["sz"] < 5.5:  # tiny stat label over a big number -> don't reach the number
             y1 = y0 + (y1-y0)*0.45
         redact.append([x0, y0, x1, y1])
-    redact += [list(s["bb"]) for (_, _, bs) in abil for s in bs]
+    redact += [list(s["bb"]) for (_, _, bs, seg) in derived if seg for s in bs]
     collateral, seen = [], set()
     for s in spans:
         if s in targets or id(s) in body_ids:
@@ -260,9 +367,11 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           graphics=fitz.PDF_REDACT_LINE_ART_NONE,
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
-    for i, (a, g, bs) in enumerate(abil):                      # bodies (rich text -> bold keywords)
-        if not g:
+    n_bodies = 0
+    for a, g, bs, seg in derived:                              # bodies (rich text -> bold keywords)
+        if not g or not seg:                                   # no prose, or untranslated -> leave EN
             continue
+        n_bodies += 1
         fs = g["fs"]; lh = max(1.0, g["spacing"]/fs)
         y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line 1 on the original baseline
         bottom = g["last"]+fs+2
@@ -275,13 +384,15 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
             cx, cy = (a["block"][0]+a["block"][2])/2, (a["block"][1]+a["block"][3])/2
             rect = fitz.Rect(2*cx-lrect[2], 2*cy-lrect[3], 2*cx-lrect[0], 2*cy-lrect[1])
         indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)
+        body = seg["target_text"]
+        inner = apply_bold(body, seg["bold"]) if seg["bold"] else auto_bold(body)
         html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
-                f'line-height:{lh:.3f}">{auto_bold(a["body"])}</div>')
+                f'line-height:{lh:.3f}">{inner}</div>')
         page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
         draw(page, s, s["t"])
     for s in targets:
-        pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
+        pl = lookup(s)
         if s["t"] in PILLS:
             draw_pill(page, s, pl); continue
         if s["t"] in CENTERED:                                 # centred banner value -> fit the box
@@ -291,7 +402,7 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                 if c and c.width > (s["bb"][2]-s["bb"][0])*1.3:
                     fit = c
             draw(page, s, pl, fit=fit)
-        elif s["t"] in PHASES or s["t"] in HEADERS:            # bar/header labels grow into free space
+        elif s["t"] in PHASES or is_header_span(s):            # bar/header labels grow into free space
             av = avail_width(s, spans)
             c = find_container(conts, s["bb"])                 # but never past the bar/segment edge
             if c:
@@ -306,8 +417,44 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
     one = fitz.open(); one.insert_pdf(doc, from_page=page_no, to_page=page_no)
     one.save(pdf)
     fitz.open(pdf)[0].get_pixmap(dpi=200).save(out / f"{stem}.png")
-    print(f"targets={len(targets)} collateral={len(collateral)} bodies={len(ABILITIES)} -> {pdf}")
+    print(f"  p{page_no}: blocks={len(abil)} targets={len(targets)} collateral={len(collateral)} "
+          f"bodies={n_bodies}/{len(abil)} -> {pdf.name}")
+    return {"blocks": len(abil), "targets": len(targets), "bodies": n_bodies}
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Localize a SC:TMG card sheet in place from a segments JSONL.")
+    ap.add_argument("src", nargs="?", default="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf",
+                    help="PDF filename under sources/pdf/")
+    ap.add_argument("pages", nargs="?", default="0",
+                    help="page index, range 'a-b', comma list, or 'all' (default 0)")
+    ap.add_argument("lang", nargs="?", default="pl")
+    ap.add_argument("--segments", default=None,
+                    help="segments JSONL (default data/segments/<doc>.jsonl)")
+    args = ap.parse_args(argv if argv is not None else sys.argv[1:])
+
+    src, lang = args.src, args.lang
+    doc_key = doc_slug(src)
+    seg_path = Path(args.segments) if args.segments else (ROOT / "data/segments" / f"{doc_key}.jsonl")
+    by_source, by_id = load_segments(seg_path, doc_key)
+    if not by_source and not by_id:
+        print(f"[warn] no segments at {seg_path} — EN fallback (nothing will be translated)")
+
+    n_pages = fitz.open(ROOT / "sources/pdf" / src).page_count
+    spec = args.pages.strip().lower()
+    if spec == "all":
+        pages = list(range(n_pages))
+    elif "," in spec:
+        pages = [int(x) for x in spec.split(",") if x.strip() != ""]
+    elif "-" in spec:
+        a, b = spec.split("-"); pages = list(range(int(a), int(b)+1))
+    else:
+        pages = [int(spec)]
+
+    print(f"{doc_key}  segments={seg_path.name}  ({len(by_source)} labels, {len(by_id)} bodies)")
+    for p in pages:
+        render_page(src, p, lang, by_source, by_id, doc_key)
 
 
 if __name__ == "__main__":
-    main(*(sys.argv[1:] or []))
+    main()
