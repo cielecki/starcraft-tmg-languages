@@ -57,6 +57,28 @@ PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
 # Genuinely centred in a box/banner -> container-fit. Everything else is LEFT-aligned and grows
 # rightward into free space (centring a left-aligned bar label shoves it onto its icon, e.g. UPGRADE).
 CENTERED = {"CORE", "DAMAGE DEALER"}
+HEADERS = {"RESONATING GLAVES:", "GUIDANCE:", "PSIONIC TRANSFER:", "PSIONIC PRESENCE:"}
+PHASES = {"COMBAT PHASE", "ASSAULT PHASE", "MOVEMENT PHASE", "ANY PHASE", "UPGRADE", "U P G R A D E"}
+NOT_BODY = HEADERS | PILLS | PHASES                            # drawn separately; never body prose
+
+# Glossary KEYWORDS — bolded automatically wherever they occur in a body (the source bolds these
+# game terms; deriving from a keyword list instead of hand-marking <b> means we never miss one).
+# Longest-first so multi-word terms win. As the real glossary grows this list comes from it.
+KEYWORDS = [
+    'całkowicie w promieniu 12"', 'w promieniu 4"', 'WZMOCNIENIE RoA (1)', 'ANTY-UNIK (2)',
+    'model prowadzący', 'Na końcu rundy', 'PRECYZJĘ (1)', 'Działo glewii', 'Działa glewii',
+    'PRZEMIESZCZENIE', 'sojuszniczych', 'spójności', 'bronie', 'wrogą', 'Cienia', 'Cień',
+]
+
+
+def auto_bold(text):
+    ph = []
+    for kw in KEYWORDS:
+        if kw in text:
+            text = text.replace(kw, f"\x00{len(ph)}\x01"); ph.append(kw)
+    for i, kw in enumerate(ph):
+        text = text.replace(f"\x00{i}\x01", f"<b>{kw}</b>")
+    return text
 
 # block = full ability rect (redacted to clear original). body = reflow rect (starts on the header
 # line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
@@ -64,15 +86,15 @@ CENTERED = {"CORE", "DAMAGE DEALER"}
 # Only the structural facts: which rect is an ability block, its orientation, and the PL body
 # (bold keywords marked). The body's geometry — baseline, start-after-pills, wrap width, line
 # spacing — is DERIVED from the original body spans (derive_body), not hand-measured.
-ABILITIES = [
+ABILITIES = [  # plain PL text; bold is applied automatically from KEYWORDS (no hand-marked <b>)
     {"block": [189, 476, 349, 497], "rot": 0,
-     "html": "<b>Działo glewii</b> tej jednostki zyskuje <b>WZMOCNIENIE RoA (1)</b>."},
+     "body": "Działo glewii tej jednostki zyskuje WZMOCNIENIE RoA (1)."},
     {"block": [351, 476, 489, 497], "rot": 0,
-     "html": "Broń dystansowa <b>Działa glewii</b> tej jednostki zyskuje <b>ANTY-UNIK (2)</b>."},
+     "body": "Broń dystansowa Działa glewii tej jednostki zyskuje ANTY-UNIK (2)."},
     {"block": [85, 313, 421, 348], "rot": 180,
-     "html": "Umieść żeton <b>Cienia</b> całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton <b>Cienia</b> jako model prowadzący. Żeton ma <b>PRZEMIESZCZENIE</b>."},
+     "body": "Umieść żeton Cienia całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele tej jednostki w spójności, traktując żeton Cienia jako model prowadzący. Żeton Cienia ma PRZEMIESZCZENIE."},
     {"block": [85, 352, 421, 376], "rot": 180,
-     "html": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu <b>Cienia</b> zyskują <b>PRECYZJĘ (1)</b>."},
+     "body": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu Cienia zyskują PRECYZJĘ (1)."},
 ]
 
 
@@ -122,7 +144,7 @@ def to_logical(x, y, block, rot):
 def derive_body(spans, block, rot):
     """Read the original body's layout (baseline, start-after-pills, wrap width, line spacing) from
     its prose spans, in the reading frame, so the PL reflow matches the original by construction."""
-    bs = [s for s in spans if in_rect(s["bb"], block) and s["t"] not in MAP]
+    bs = [s for s in spans if in_rect(s["bb"], block) and s["t"] not in NOT_BODY]
     if not bs:
         return None, []
     L = []
@@ -204,10 +226,12 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                     spans.append({"t": s["text"].strip(), "bb": s["bbox"], "org": s["origin"],
                                   "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
 
-    targets = [s for s in spans if s["t"] in MAP]
     conts = containers(page)
     abil = [(a, *derive_body(spans, a["block"], a["rot"])) for a in ABILITIES]
     body_ids = {id(s) for (_, _, bs) in abil for s in bs}
+    # a span inside an ability body is never a standalone target (even if it matches MAP, e.g. "All"
+    # -> "Wsz."): the body reflow handles it. Otherwise it gets drawn twice.
+    targets = [s for s in spans if s["t"] in MAP and id(s) not in body_ids]
 
     # Redact ONLY what we replace: translated labels + ability prose. NOT whole blocks — that would
     # catch phase-bar icons (e.g. the upgrade arrow) and redraw them in the wrong font.
@@ -247,9 +271,9 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
         else:                                                  # transform the logical rect to page
             cx, cy = (a["block"][0]+a["block"][2])/2, (a["block"][1]+a["block"][3])/2
             rect = fitz.Rect(2*cx-lrect[2], 2*cy-lrect[3], 2*cx-lrect[0], 2*cy-lrect[1])
-        indent = g["start_x"] - g["left"]
+        indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)  # gap after the pills
         html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
-                f'line-height:{lh:.3f}">{a["html"]}</div>')
+                f'line-height:{lh:.3f}">{auto_bold(a["body"])}</div>')
         page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
         draw(page, s, s["t"])
@@ -265,7 +289,11 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                     fit = c
             draw(page, s, pl, fit=fit)
         else:                                                  # left-aligned -> grow into free space
-            draw(page, s, pl, avail=avail_width(s, spans))
+            av = avail_width(s, spans)
+            c = find_container(conts, s["bb"])                 # but never past the bar/segment edge
+            if c:
+                av = min(av, (c.x1 - s["org"][0] - 2) if s["dir"] >= 0 else (s["org"][0] - c.x0 - 2))
+            draw(page, s, pl, avail=av)
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
