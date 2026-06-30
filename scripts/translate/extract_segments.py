@@ -238,6 +238,64 @@ def logical_xy(s):
     return to_logical(s["org"][0], s["org"][1], s["dir"])
 
 
+def _assign_landscape(plist, alist):
+    """Greedy nearest-header body assignment for DENSE landscape cards (dir 90/270), in the logical
+    reading frame. Each anchor (top-to-bottom reading order) consumes the contiguous run of prose
+    lines in its half-width column, stopping at the next anchor down in that column or a line-sized
+    vertical gap. Robust where the column-gutter heuristic mis-splits tightly-packed abilities whose
+    bodies wrap wider than their header. Returns [(reading_key(anchor), group, anchor), ...]."""
+    out = []
+    info = [{"a": a, "x": logical_xy(a)[0], "y": logical_xy(a)[1]} for a in alist]
+    order = sorted(info, key=lambda it: (it["y"], it["x"]))
+    consumed = set()
+    for it in order:
+        a = it["a"]; ax, ay = it["x"], it["y"]
+        # half-width column centred on the header, narrowed to the midpoint of any anchor sharing
+        # this header's row (side-by-side abilities)
+        col_l, col_r = ax - 150, ax + 150
+        for o in info:
+            if o is it:
+                continue
+            if abs(o["y"] - ay) < ROW_H:
+                if o["x"] > ax:
+                    col_r = min(col_r, (ax + o["x"]) / 2)
+                else:
+                    col_l = max(col_l, (ax + o["x"]) / 2)
+        # the next anchor DOWN in this column ends the body
+        next_y = None
+        for o in info:
+            if o is it:
+                continue
+            if o["y"] > ay + 2 and col_l - 2 <= o["x"] <= col_r + 2:
+                next_y = o["y"] if next_y is None else min(next_y, o["y"])
+        cand = []
+        for ps in plist:
+            if id(ps) in consumed:
+                continue
+            px, py = logical_xy(ps)
+            xc = (to_logical(ps["bb"][0], ps["bb"][1], ps["dir"])[0]
+                  + to_logical(ps["bb"][2], ps["bb"][3], ps["dir"])[0]) / 2
+            if py < ay - 6 or not (col_l <= xc <= col_r):
+                continue
+            if next_y is not None and py >= next_y - 2:
+                continue
+            cand.append((py, ps))
+        cand.sort(key=lambda t: t[0])
+        if not cand:
+            continue
+        sizes = sorted(ps["sz"] for _, ps in cand)
+        line_adv = sizes[len(sizes) // 2] * 1.7
+        prev = ay
+        grp = []
+        for py, ps in cand:
+            if py - prev > line_adv + 4:
+                break
+            grp.append(ps); consumed.add(id(ps)); prev = max(prev, py)
+        if grp:
+            out.append((reading_key(a), grp, a))
+    return out
+
+
 def assemble_bodies(prose, headers, panels, doc, page_no):
     """Group prose spans into ability bodies.
 
@@ -292,6 +350,16 @@ def assemble_bodies(prose, headers, panels, doc, page_no):
             for g in groups:
                 if g:
                     assigned.append((min(reading_key(x) for x in g), g, None))
+            continue
+        # DENSE LANDSCAPE cards (dir 90/270): the gutter heuristic below mis-columns abilities whose
+        # body wraps WIDER than its header — bodies leak between neighbours and one ability is dropped
+        # (Protoss p8 MASS RECALL, Terran p8 SCANNER SWEEP / STRAP IN, Zerg p12 EXTENDED CLAWS). For
+        # these we use the robust greedy nearest-header consumption (mirrors the layout engine's
+        # card_inplace._assign_bodies): each anchor, in reading order, consumes the contiguous run of
+        # prose lines in its half-width column, bounded below by the next anchor DOWN in that column.
+        # The portrait unit cards (dir 0/180) keep the proven gutter logic untouched.
+        if d in (90, 270):
+            assigned.extend(_assign_landscape(plist, alist))
             continue
         # Assign each prose span to its owning header in the LOGICAL frame. Two stages:
         #   (1) ROW: pick the header-row nearest at/above the prose (an ability's body wraps
@@ -512,10 +580,114 @@ def weapon_title_baselines(spans):
     return out
 
 
+def _logical_box(s):
+    a = to_logical(s["bb"][0], s["bb"][1], s["dir"]); b = to_logical(s["bb"][2], s["bb"][3], s["dir"])
+    return [min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])]
+
+
+def merge_split_colon_headers(spans):
+    """Mirror of card_inplace.merge_split_colon_headers: some ability names are CondensedBOLD with a
+    SEPARATE tiny ExtraBold ':' span (Zerg 'FERAL RAGE' + ':'). Merge them into one ExtraBold
+    'FERAL RAGE:' header span so the extractor classifies it as a header (matching the layout engine)
+    instead of leaving the lone ':' as a spurious empty-named header and folding the name into prose."""
+    out = list(spans)
+    for c in [s for s in out if s["t"] == ":" and s["font"] == "NotoSans-CondensedExtraB"]:
+        clb = _logical_box(c); ccy = (clb[1] + clb[3]) / 2
+        best = None
+        for s in out:
+            if s is c or s["dir"] != c["dir"]:
+                continue
+            if "Bold" not in s["font"] and "ExtraB" not in s["font"]:
+                continue
+            if s["t"] != s["t"].upper() or not any(ch.isalpha() for ch in s["t"]):
+                continue
+            slb = _logical_box(s)
+            if abs((slb[1] + slb[3]) / 2 - ccy) > 3 or not (0 <= clb[0] - slb[2] < 6):
+                continue
+            if best is None or slb[2] > _logical_box(best)[2]:
+                best = s
+        if best is None:
+            continue
+        merged = dict(best)
+        merged["t"] = best["t"].rstrip() + ":"
+        merged["font"] = "NotoSans-CondensedExtraB"
+        merged["bb"] = [min(best["bb"][0], c["bb"][0]), min(best["bb"][1], c["bb"][1]),
+                        max(best["bb"][2], c["bb"][2]), max(best["bb"][3], c["bb"][3])]
+        out.remove(best); out.remove(c); out.append(merged)
+    return out
+
+
+# --- scenario / mission card prose ------------------------------------------
+# The scenario sheets (Protoss p10-13, Terran p10-13, Zerg p16-19) are NOT ability cards: each
+# mission card carries multi-paragraph prose under CondensedBLACK ':' sub-headers (MISSION
+# PARAMETERS:, SCORING CONDITIONS:, ADDITIONAL CONDITIONS:) — no ExtraBold ability header anchors
+# them, so the ability-body pipeline leaves them EN. We detect those sub-headers as anchors and
+# group the prose below each in its card column. The body header_source is "<CARD TITLE> / <SUB>:"
+# (the Geogrotesque card title above disambiguates the sub-header, which repeats per card).
+SCEN_SUBHEADER_RE = re.compile(r":$")
+
+
+def is_scenario_subheader(s):
+    return (s["font"] == "NotoSans-CondensedBlack" and s["dir"] == 0 and 7 <= s["sz"] <= 9
+            and s["t"].rstrip().endswith(":") and s["t"] == s["t"].upper()
+            and len(s["t"]) > 4 and s["t"] not in PHASE_WORDS)
+
+
+def scenario_card_title(s, titles):
+    """The Geogrotesque card title (e.g. SUPPLY DROP) whose column+above-position best owns this
+    sub-header — disambiguates the repeated sub-header text across the 6-8 cards on the page."""
+    sx = (s["bb"][0] + s["bb"][2]) / 2
+    cand = [t for t in titles if t["bb"][1] <= s["bb"][1] + 2
+            and abs((t["bb"][0] + t["bb"][2]) / 2 - sx) < 150]
+    if not cand:
+        cand = [t for t in titles if abs((t["bb"][0] + t["bb"][2]) / 2 - sx) < 150] or titles
+    return max(cand, key=lambda t: t["bb"][1])["t"] if cand else ""
+
+
+def scenario_bodies(spans):
+    """Group scenario/mission-card prose under its CondensedBlack ':' sub-header (per card column).
+    Returns [{source_text, bold, header_source}] with header_source '<CARD TITLE> / <SUB>:' so the
+    layout engine can re-find each body. Returns [] when the page has no such sub-headers (i.e. it
+    is a normal unit/tactical page) — so this is inert except on the scenario sheets."""
+    subs = [s for s in spans if is_scenario_subheader(s)]
+    if not subs:
+        return []
+    titles = [s for s in spans if s["font"].startswith("Geogrotesque") and s["dir"] == 0
+              and s["sz"] >= 11 and s["t"].strip()]
+    prose = [s for s in spans
+             if s["dir"] == 0 and s["font"] in PROSE_FONTS and 5 < s["sz"] < 9
+             and not is_symbol(s["t"]) and not is_scenario_subheader(s)]
+    subs_sorted = sorted(subs, key=lambda s: (round(s["bb"][1]), s["bb"][0]))
+    out = []
+    used = set()
+    for h in subs_sorted:
+        hx = (h["bb"][0] + h["bb"][2]) / 2
+        col_l, col_r = hx - 48, hx + 150     # sub-header is indented; body wraps a touch further left
+        # next sub-header DOWN in this column bounds the prose
+        next_y = min([o["bb"][1] for o in subs_sorted
+                      if o is not h and col_l <= (o["bb"][0] + o["bb"][2]) / 2 <= col_r
+                      and o["bb"][1] > h["bb"][3] + 1], default=h["bb"][3] + 260)
+        mem = [s for s in prose if id(s) not in used
+               and col_l <= (s["bb"][0] + s["bb"][2]) / 2 <= col_r
+               and h["bb"][1] - 1 <= s["bb"][1] < next_y - 1]
+        if not mem:
+            continue
+        mem.sort(key=reading_key)
+        for s in mem:
+            used.add(id(s))
+        text, bold = join_with_bold(mem)
+        if not is_real_body(text):
+            continue
+        title = scenario_card_title(h, titles)
+        header_source = (title + " / " + h["t"].rstrip()) if title else h["t"].rstrip()
+        out.append({"source_text": text, "bold": bold, "header_source": header_source})
+    return out
+
+
 def extract_page(page, doc, page_no):
     global PAGE_W, PAGE_H
     PAGE_W, PAGE_H = page.rect.width, page.rect.height
-    spans = collect_spans(page)
+    spans = merge_split_colon_headers(collect_spans(page))
     panels = grey_panels(page)
     wbl = weapon_title_baselines(spans)
     labels, headers_raw, pills, cells, prose = [], [], [], [], []
@@ -535,13 +707,28 @@ def extract_page(page, doc, page_no):
             prose.append(s)
 
     headers = merge_split_headers(headers_raw)
+
+    # Scenario / mission cards: prose under CondensedBlack ':' sub-headers (no ExtraBold anchor). When
+    # present, those prose spans are consumed here and kept OUT of the ability-body assembler (which
+    # has no anchor for them and would dump them as one garbled leftover block).
+    scen = scenario_bodies(spans)
+    scen_used = set()
+    if scen:
+        # re-derive which prose spans the scenario pass consumed, by re-grouping deterministically
+        prose_dir0 = [s for s in prose if s["dir"] == 0]
+        for s in prose_dir0:
+            scen_used.add(id(s))
+        prose = [s for s in prose if id(s) not in scen_used]
+
     bodies = assemble_bodies(prose, headers, panels, doc, page_no)
 
     segs = []
 
-    def emit(kind, text, bold=None, block_index=None, header_source=None):
+    def emit(kind, text, bold=None, block_index=None, header_source=None, scen_index=None):
         if block_index is not None:
             sid = f"{doc}:p{page_no}:ability:{block_index}"
+        elif scen_index is not None:
+            sid = f"{doc}:p{page_no}:scenario:{scen_index}"
         else:
             sid = f"{doc}:p{page_no}:{kind}:{emit.counters.setdefault(kind, 0)}"
             emit.counters[kind] += 1
@@ -569,6 +756,9 @@ def extract_page(page, doc, page_no):
         emit("cell", s["t"])
     for b in bodies:
         emit("body", b["source_text"], bold=b["bold"], block_index=b["block_index"],
+             header_source=b.get("header_source", ""))
+    for i, b in enumerate(scen):
+        emit("body", b["source_text"], bold=b["bold"], scen_index=i,
              header_source=b.get("header_source", ""))
     return segs
 
