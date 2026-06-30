@@ -260,6 +260,39 @@ def pill_intrusions_introduced(pl_recs, en_recs):
     return [r for r in pl_recs if _pill_key(r) not in en_pills]
 
 
+# ── identical-token over-draw ────────────────────────────────────────────────────────────────────
+def _token_counts(page):
+    """Multiset of stripped non-empty span texts on a page (the count each token is DRAWN)."""
+    c = {}
+    for b in page.get_text("dict")["blocks"]:
+        for l in b.get("lines", []):
+            for s in l.get("spans", []):
+                t = s["text"].strip()
+                if t:
+                    c[t] = c.get(t, 0) + 1
+    return c
+
+
+def token_overdraws(pl_page, en_page):
+    """Identical-token over-draws on a page: a PASSTHROUGH token (one that occurs in BOTH the EN
+    source and the PL output — symbols / numbers / measurements like '×', '6\"', 'Size 2' that the
+    engine copies verbatim) that the PL draws MORE times than the EN source did. Each extra draw is a
+    redact-then-redraw failure (the original survived and a copy landed on top), the same-text class
+    of introduced overlap. Tokens NEW to PL (real translations) are excluded — they have no EN
+    counterpart to over-draw against. Returns [{token, en, pl, extra}] for tokens with extra > 0."""
+    if en_page is None:
+        return []
+    en_c = _token_counts(en_page)
+    pl_c = _token_counts(pl_page)
+    out = []
+    for t, n in pl_c.items():
+        e = en_c.get(t, 0)
+        if e > 0 and n > e:                          # passthrough token drawn more in PL than EN
+            out.append({"token": t, "en": e, "pl": n, "extra": n - e})
+    out.sort(key=lambda r: -r["extra"])
+    return out
+
+
 # ── EN parity ──────────────────────────────────────────────────────────────────────────────────
 def en_source_for(pl_pdf, source_dir):
     base = os.path.basename(pl_pdf)
@@ -289,14 +322,19 @@ def main():
     ink = not a.no_ink
 
     report = {}
-    grand = {"en": 0, "pl": 0, "introduced": 0, "pills": 0}
+    # `diff` / `same` split the INTRODUCED total: diff = two DIFFERENT texts whose ink touches (the
+    # real defect), same = same-text emboss/reinforcement double-draws (a draw-once failure when the
+    # PL count exceeds EN — surfaced separately via `overdraw`). `overdraw` = identical passthrough
+    # tokens drawn more times in PL than EN. All three are NEW; en/pl/introduced/pills are unchanged.
+    grand = {"en": 0, "pl": 0, "introduced": 0, "diff": 0, "same": 0, "pills": 0, "overdraw": 0}
     for pdf in a.pdfs:
         doc = fitz.open(pdf)
         en = None if a.raw else (lambda s: fitz.open(s) if s and os.path.exists(s) else None)(
             en_source_for(pdf, a.source_dir))
         pages = {}
         pill_pages = {}
-        tot = {"en": 0, "pl": 0, "introduced": 0, "pills": 0}
+        over_pages = {}
+        tot = {"en": 0, "pl": 0, "introduced": 0, "diff": 0, "same": 0, "pills": 0, "overdraw": 0}
         for i, page in enumerate(doc):
             pl_hits = lint_page(page, a.min_ratio, a.min_area, ink, a.dpi)
             tot["pl"] += len(pl_hits)
@@ -307,14 +345,22 @@ def main():
             for h in intro:
                 h.pop("union", None)
             if intro:
-                pages[i] = intro; tot["introduced"] += len(intro)
+                pages[i] = intro
+                tot["introduced"] += len(intro)
+                tot["diff"] += sum(1 for h in intro if h["a"] != h["b"])
+                tot["same"] += sum(1 for h in intro if h["a"] == h["b"])
 
             pl_pi = pill_intrusions(page, a.dpi)
             en_pi = (pill_intrusions(en[i], a.dpi) if (en and i < en.page_count) else [])
             pi = pill_intrusions_introduced(pl_pi, en_pi) if en else pl_pi
             if pi:
                 pill_pages[i] = pi; tot["pills"] += len(pi)
-        report[pdf] = {"pages": pages, "pill_pages": pill_pages, "totals": tot}
+
+            od = token_overdraws(page, en[i] if (en and i < en.page_count) else None)
+            if od:
+                over_pages[i] = od; tot["overdraw"] += sum(r["extra"] for r in od)
+        report[pdf] = {"pages": pages, "pill_pages": pill_pages, "over_pages": over_pages,
+                       "totals": tot}
         for k in grand:
             grand[k] += tot[k]
 
@@ -329,13 +375,16 @@ def main():
         mode = "box-only" if a.no_ink else f"ink@{a.dpi}dpi"
         for pdf, v in report.items():
             t = v["totals"]
-            print(f"\n{os.path.basename(pdf)}: INTRODUCED={t['introduced']}  PILL-INTRUSIONS={t['pills']}"
-                  f"  (EN={t['en']} PL={t['pl']})")
+            print(f"\n{os.path.basename(pdf)}: INTRODUCED={t['introduced']} "
+                  f"(diff-text={t['diff']} same-text={t['same']})  PILL-INTRUSIONS={t['pills']}"
+                  f"  OVER-DRAW={t['overdraw']}  (EN={t['en']} PL={t['pl']})")
             for pg in sorted(v["pages"]):
                 hits = v["pages"][pg]
-                print(f"  p{pg} text-on-text: {len(hits)}")
+                nd = sum(1 for h in hits if h["a"] != h["b"])
+                print(f"  p{pg} text-on-text: {len(hits)} (diff-text={nd})")
                 for h in hits[:5]:
-                    print(f"      [{h['ratio']:.2f}] {h['a']!r:30.30} ⨯ {h['b']!r:30.30}")
+                    mark = "≠" if h["a"] != h["b"] else "="
+                    print(f"      [{h['ratio']:.2f}]{mark} {h['a']!r:30.30} ⨯ {h['b']!r:30.30}")
                 if len(hits) > 5:
                     print(f"      … +{len(hits)-5} more")
             for pg in sorted(v["pill_pages"]):
@@ -345,9 +394,26 @@ def main():
                     print(f"      [{h['colour']:5}] {h['text']!r:40.40} into {h['pill']}")
                 if len(pis) > 5:
                     print(f"      … +{len(pis)-5} more")
-        print(f"\nGRAND ({mode}): INTRODUCED={grand['introduced']}  PILL-INTRUSIONS={grand['pills']}"
+            for pg in sorted(v["over_pages"]):
+                ods = v["over_pages"][pg]
+                print(f"  p{pg} over-draws: {sum(r['extra'] for r in ods)}")
+                for r in ods[:5]:
+                    print(f"      {r['token']!r:20.20} PL={r['pl']} EN={r['en']} (+{r['extra']})")
+                if len(ods) > 5:
+                    print(f"      … +{len(ods)-5} more")
+        print(f"\nGRAND ({mode}): INTRODUCED={grand['introduced']} "
+              f"(diff-text={grand['diff']} same-text={grand['same']})  "
+              f"PILL-INTRUSIONS={grand['pills']}  OVER-DRAW={grand['overdraw']}"
               f"  (EN baseline={grand['en']}, PL total={grand['pl']})")
-    sys.exit(1 if (grand["introduced"] or grand["pills"]) else 0)
+        defects = grand["diff"] + grand["pills"] + grand["overdraw"]
+        print(f"DEFECTS (gate target = 0): {defects}  "
+              f"[diff-text={grand['diff']} + pill={grand['pills']} + over-draw={grand['overdraw']}]")
+    # Gate: any DIFFERENT-text collision, pill-intrusion, or identical-token over-draw fails. (The
+    # legacy exit also fired on same-text introduced overlaps via `introduced`; same-text emboss
+    # reinforcement is intentional, so the real-defect gate is diff/pill/over-draw. Kept non-zero
+    # whenever the legacy `introduced` is non-zero too, so nothing that used to fail now passes.)
+    fail = grand["diff"] or grand["pills"] or grand["overdraw"] or grand["introduced"]
+    sys.exit(1 if fail else 0)
 
 
 if __name__ == "__main__":
