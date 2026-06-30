@@ -58,14 +58,17 @@ PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
 # block = full ability rect (redacted to clear original). body = reflow rect (starts on the header
 # line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
 # width below — matching the original. rot 180 (front) keeps indent 0 (rotated-flow indent is wrong-side).
+# Only the structural facts: which rect is an ability block, its orientation, and the PL body
+# (bold keywords marked). The body's geometry — baseline, start-after-pills, wrap width, line
+# spacing — is DERIVED from the original body spans (derive_body), not hand-measured.
 ABILITIES = [
-    {"block": [189, 476, 349, 497], "body": [192, 480, 347, 500], "indent": 104, "rot": 0,
+    {"block": [189, 476, 349, 497], "rot": 0,
      "html": "<b>Działo glewii</b> tej jednostki zyskuje <b>WZMOCNIENIE RoA (1)</b>."},
-    {"block": [351, 476, 489, 497], "body": [354, 480, 487, 500], "indent": 60, "rot": 0,
+    {"block": [351, 476, 489, 497], "rot": 0,
      "html": "Broń dystansowa <b>Działa glewii</b> tej jednostki zyskuje <b>ANTY-UNIK (2)</b>."},
-    {"block": [85, 313, 421, 348], "body": [88, 314, 320, 347], "indent": 0, "rot": 180,
+    {"block": [85, 313, 421, 348], "rot": 180,
      "html": "Umieść żeton <b>Cienia</b> całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton <b>Cienia</b> jako model prowadzący. Żeton ma <b>PRZEMIESZCZENIE</b>."},
-    {"block": [85, 352, 421, 376], "body": [88, 353, 320, 375], "indent": 0, "rot": 180,
+    {"block": [85, 352, 421, 376], "rot": 180,
      "html": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu <b>Cienia</b> zyskują <b>PRECYZJĘ (1)</b>."},
 ]
 
@@ -89,6 +92,30 @@ def pick(font):
 def in_rect(bb, r):
     cx, cy = (bb[0]+bb[2])/2, (bb[1]+bb[3])/2
     return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
+
+
+def derive_body(spans, block):
+    """Read the original body's layout from its prose spans (everything in the block that isn't a
+    translated label/header/pill). Returns geometry so the PL reflow matches the original exactly."""
+    bs = [s for s in spans if in_rect(s["bb"], block) and s["t"] not in MAP]
+    if not bs:
+        return None
+    base1 = min(s["org"][1] for s in bs)                       # first body line baseline
+    top = [s for s in bs if s["org"][1] - base1 < 1.5]
+    rest = [s for s in bs if s["org"][1] - base1 >= 1.5]
+    bl = sorted({round(s["org"][1], 1) for s in bs})
+    sizes = sorted(s["sz"] for s in bs)
+    return {
+        "start_x": min(s["org"][0] for s in top),             # where line 1 begins (after pills)
+        "left": min((s["org"][0] for s in rest), default=min(s["org"][0] for s in top)),
+        "right": max(s["bb"][2] for s in bs),
+        "base1": base1,
+        "last": max(s["org"][1] for s in bs),
+        "fs": sizes[len(sizes)//2],                            # original body font size (median)
+        "spacing": (bl[1]-bl[0]) if len(bl) > 1 else sizes[len(sizes)//2]*1.2,
+        "bbox": fitz.Rect(min(s["bb"][0] for s in bs), min(s["bb"][1] for s in bs),
+                          max(s["bb"][2] for s in bs), max(s["bb"][3] for s in bs)),
+    }
 
 
 def draw(page, s, text, key=None):
@@ -144,11 +171,21 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
     for a in ABILITIES:
-        html = f'<div style="text-indent:{a["indent"]}px;font-size:6.6pt">{a["html"]}</div>'
-        _, scale = page.insert_htmlbox(fitz.Rect(a["body"]), html, css=BODY_CSS, archive=ARCHIVE,
-                                       rotate=a["rot"])
-        if scale < 0.99:
-            print(f"  body scaled {scale:.2f} (indent may drift) block={a['block']}")
+        g = derive_body(spans, a["block"])
+        if not g:
+            continue
+        fs = g["fs"]
+        if a["rot"] == 0:  # full derivation: baseline-aligned, start after pills, original spacing
+            lh = max(1.0, g["spacing"]/fs)
+            y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line-1 on base1
+            rect = fitz.Rect(g["left"]-0.5, y0, g["right"]+1, g["last"]+fs+2)
+            indent = g["start_x"] - g["left"]
+            html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
+                    f'line-height:{lh:.3f}">{a["html"]}</div>')
+        else:              # rotated front: fill the original body bbox
+            rect = g["bbox"] + (-0.5, -0.5, 1, 1)
+            html = f'<div style="font-size:{fs:.1f}pt">{a["html"]}</div>'
+        page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
         draw(page, s, s["t"])
     for s in targets:
