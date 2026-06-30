@@ -373,9 +373,15 @@ def assemble_bodies(prose, headers, panels, doc, page_no):
         text, bold = join_with_bold(group)
         if not is_real_body(text):
             continue
-        bodies.append({"source_text": text, "bold": bold})
+        # header_source = the EN ability-header text this body flows from. This is the STABLE,
+        # language-independent key the layout engine matches on (its own ability detector orders
+        # blocks differently than this extractor, so the positional block_index alone is NOT a
+        # reliable cross-engine key — the header text is). Anchor-less bodies (no ':'-header, e.g.
+        # a faction-card panel) get "".
+        header_source = _anchor["t"].rstrip() if _anchor is not None else ""
+        bodies.append({"source_text": text, "bold": bold, "header_source": header_source})
     # block_index is assigned AFTER dropping non-prose stragglers, so it stays a contiguous
-    # top-to-bottom ability order the layout engine can match on.
+    # top-to-bottom ability order (kept as a positional fallback for the layout engine).
     for idx, b in enumerate(bodies):
         b["block_index"] = idx
     return bodies
@@ -533,18 +539,22 @@ def extract_page(page, doc, page_no):
 
     segs = []
 
-    def emit(kind, text, bold=None, block_index=None):
+    def emit(kind, text, bold=None, block_index=None, header_source=None):
         if block_index is not None:
             sid = f"{doc}:p{page_no}:ability:{block_index}"
         else:
             sid = f"{doc}:p{page_no}:{kind}:{emit.counters.setdefault(kind, 0)}"
             emit.counters[kind] += 1
-        segs.append({
+        rec = {
             "id": sid, "doc": doc, "page": page_no, "kind": kind,
             "source_text": text, "target_text": "",
             "bold": bold if bold is not None else [],
             "status": "new", "notes": "",
-        })
+        }
+        if kind == "body":
+            # the EN ability-header this body belongs to — the engine's robust lookup key.
+            rec["header_source"] = header_source or ""
+        segs.append(rec)
     emit.counters = {}
 
     # deterministic emission order: labels, headers, pills, cells (each in reading order),
@@ -558,7 +568,8 @@ def extract_page(page, doc, page_no):
     for s in sorted(cells, key=reading_key):
         emit("cell", s["t"])
     for b in bodies:
-        emit("body", b["source_text"], bold=b["bold"], block_index=b["block_index"])
+        emit("body", b["source_text"], bold=b["bold"], block_index=b["block_index"],
+             header_source=b.get("header_source", ""))
     return segs
 
 

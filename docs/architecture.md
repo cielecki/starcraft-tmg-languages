@@ -31,6 +31,28 @@ the same machinery. Design favors small, independently-testable units with clear
 - **Human review** gate before a document is marked done.
 - **Interface out:** `translations/pl/<doc>.jsonl` (source+target per segment), status-tracked.
 
+**Realized (P2P card sheets).** The pipeline above is implemented in `scripts/translate/` and the
+glossary in `glossary/pl.csv` (214 EN→PL term pairs):
+- `extract_segments.py` — deterministic segmenter: one record per translatable unit
+  (`kind` ∈ label/header/pill/cell/body), written to `data/segments/<doc>.jsonl`. Ability **bodies**
+  carry `id` = `"<doc>:p<page>:ability:<block_index>"`, the source-bold char ranges in `bold`, and
+  **`header_source`** = the EN ability-header the body belongs to (see the alignment note below).
+- `translate_segments.py` — glossary-constrained PL fill of `target_text`.
+- `verify_segments.py` — glossary-adherence + consistency checks over the filled segments.
+- The three real P2P sheets (`StarCraft-{Protoss,Terran,Zerg}-P2P-Card-Sheets-A4_EN.jsonl`,
+  3920 segments) are the committed target side; the layout engine (subsystem 4) consumes them.
+
+**Body-alignment contract (extractor ↔ layout engine).** The extractor and the in-place layout
+engine **detect ability blocks by different signals** (extractor: grey `#dadad9` panel + 4-orientation
+transform; engine: ExtraBold `…:` header font), so their block ORDER — and thus a body's positional
+`block_index` — can disagree. Matching a PL body to an ability by `block_index` alone would land it on
+the WRONG ability. The robust key is therefore the **EN ability header** (`header_source`): it is
+stable and language-independent. The engine matches each detected block's header to the body's
+`header_source` (exact, then unique-substring for multi-span header splits like
+`KINETIC FOAM:` ⊂ `VETERAN OF KINETIC FOAM:`), and only falls back to the positional `block_index`
+when no header key is usable (a pre-`header_source` JSONL, or a page with a duplicate header). Labels
+/ headers / pills / cells stay matched by `(doc, source_text)`, which is already order-independent.
+
 ### 4. PDF generation  (`scripts/generate/`, output → `build/` gitignored)
 Strategy decided by **[Spike A](spike-pdf.md)** — per document type:
 - **Rulebook / manuals → in-place region-reflow:** erase each text region by painting the sampled

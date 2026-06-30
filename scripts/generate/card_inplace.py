@@ -308,14 +308,24 @@ def detect_abilities(page, spans):
 
 
 def load_segments(path, doc):
-    """Read a segments JSONL into two lookups. Missing file -> empty (engine falls back to EN).
-      by_source[(doc, source_text)] = target_text   (labels / headers / pills / cells)
+    """Read a segments JSONL into three lookups. Missing file -> empty (engine falls back to EN).
+      by_source[(doc, source_text)] = target_text     (labels / headers / pills / cells)
       by_id[id]                     = {target_text, bold}   (bodies, id '<doc>:p<page>:ability:<i>')
-    Only rows with a non-empty target_text are indexed, so an untranslated row falls back to EN."""
-    by_source, by_id = {}, {}
+      by_header[(doc, page, hdr)]   = {target_text, bold}   (bodies, keyed on the EN ability HEADER)
+    Only rows with a non-empty target_text are indexed, so an untranslated row falls back to EN.
+
+    by_header is the ROBUST body key: this engine's ability detector orders blocks differently
+    than the extractor that wrote the JSONL, so the positional block_index in the id is NOT a
+    reliable cross-engine match (a body's PL could land on the wrong ability). The EN header text
+    (header_source) is stable and language-independent, so render_page matches on it first and only
+    falls back to the positional id when a page has no header_source (old JSONL) or a duplicate
+    header makes it ambiguous. A page with a duplicate header keeps that header out of by_header so
+    it degrades to the positional fallback rather than mis-binding both bodies to one record."""
+    by_source, by_id, by_header = {}, {}, {}
+    dup_headers = set()
     p = Path(path)
     if not p.exists():
-        return by_source, by_id
+        return by_source, by_id, by_header
     for line in p.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -325,10 +335,19 @@ def load_segments(path, doc):
         if not tgt:
             continue
         if r.get("kind") == "body":
-            by_id[r["id"]] = {"target_text": r["target_text"], "bold": r.get("bold") or []}
+            rec = {"target_text": r["target_text"], "bold": r.get("bold") or []}
+            by_id[r["id"]] = rec
+            hdr = (r.get("header_source") or "").strip()
+            if hdr:
+                key = (r.get("doc", doc), r.get("page"), hdr)
+                if key in by_header:
+                    dup_headers.add(key)        # ambiguous on this page -> drop both, use positional
+                by_header[key] = rec
         else:
             by_source[(r.get("doc", doc), r.get("source_text", ""))] = r["target_text"]
-    return by_source, by_id
+    for key in dup_headers:
+        by_header.pop(key, None)
+    return by_source, by_id, by_header
 
 
 def apply_bold(text, ranges):
@@ -384,7 +403,7 @@ def doc_slug(src):
     return Path(src).stem
 
 
-def render_page(src, page_no, lang, by_source, by_id, doc_key):
+def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
     """Localize ONE page in place and write the PDF + PNG. Returns a small stats dict."""
     doc = fitz.open(ROOT / "sources/pdf" / src)
     page = doc[page_no]
@@ -399,11 +418,38 @@ def render_page(src, page_no, lang, by_source, by_id, doc_key):
 
     conts = containers(page)
     abil = detect_abilities(page, spans)                        # AUTO-DETECT (was hardcoded ABILITIES)
-    # Attach derived geometry + the PL body (from JSONL by id) to each detected block.
+    # Attach derived geometry + the PL body to each detected block. Match the body ROBUSTLY by the
+    # block's EN header (by_header) — language-independent and order-independent — so the PL lands on
+    # the right ability even though this engine orders blocks differently than the JSONL's extractor.
+    # Three tiers, most-reliable first:
+    #   (1) EXACT header match.
+    #   (2) CONTAINMENT match — this engine and the extractor split multi-span headers differently
+    #       (engine 'KINETIC FOAM:' vs extractor 'VETERAN OF KINETIC FOAM:'), so when the engine
+    #       header is a substring of exactly ONE unmatched JSONL header on the page (or vice-versa),
+    #       bind to it. Only when unambiguous (one candidate) — never guess between two.
+    #   (3) POSITIONAL id — last resort (old JSONL without header_source, or a duplicate-header page
+    #       dropped from by_header). Unreliable across engines (ordering differs); kept only so a
+    #       header-less / pre-header_source JSONL still produces SOMETHING.
+    page_headers = {h: rec for (dk, pg, h), rec in by_header.items() if dk == doc_key and pg == page_no}
+    claimed = set()                                             # JSONL headers already bound this page
     derived = []
+    n_header_match = n_contain_match = 0
     for a in abil:
         g, bs = derive_body(a["_body"], a["block"], a["rot"])
-        seg = by_id.get(f"{doc_key}:p{page_no}:ability:{a['index']}")
+        h = (a["header"] or "").strip()
+        seg = page_headers.get(h)
+        if seg is not None:
+            n_header_match += 1
+            claimed.add(h)
+        else:
+            cand = [jh for jh in page_headers
+                    if jh not in claimed and h and (h in jh or jh in h)]
+            if len(cand) == 1:
+                seg = page_headers[cand[0]]
+                n_contain_match += 1
+                claimed.add(cand[0])
+            else:
+                seg = by_id.get(f"{doc_key}:p{page_no}:ability:{a['index']}")
         derived.append((a, g, bs, seg))
     # Only blocks WITH a translation are redrawn; the rest keep their EN prose untouched.
     body_ids = {id(s) for (_, _, bs, seg) in derived if seg for s in bs}
@@ -497,8 +543,9 @@ def render_page(src, page_no, lang, by_source, by_id, doc_key):
     one.save(pdf)
     fitz.open(pdf)[0].get_pixmap(dpi=200).save(out / f"{stem}.png")
     print(f"  p{page_no}: blocks={len(abil)} targets={len(targets)} collateral={len(collateral)} "
-          f"bodies={n_bodies}/{len(abil)} -> {pdf.name}")
-    return {"blocks": len(abil), "targets": len(targets), "bodies": n_bodies}
+          f"bodies={n_bodies}/{len(abil)} (hdr={n_header_match}+contain={n_contain_match}) -> {pdf.name}")
+    return {"blocks": len(abil), "targets": len(targets), "bodies": n_bodies,
+            "header_match": n_header_match, "contain_match": n_contain_match}
 
 
 def main(argv=None):
@@ -515,7 +562,7 @@ def main(argv=None):
     src, lang = args.src, args.lang
     doc_key = doc_slug(src)
     seg_path = Path(args.segments) if args.segments else (ROOT / "data/segments" / f"{doc_key}.jsonl")
-    by_source, by_id = load_segments(seg_path, doc_key)
+    by_source, by_id, by_header = load_segments(seg_path, doc_key)
     if not by_source and not by_id:
         print(f"[warn] no segments at {seg_path} — EN fallback (nothing will be translated)")
 
@@ -530,9 +577,10 @@ def main(argv=None):
     else:
         pages = [int(spec)]
 
-    print(f"{doc_key}  segments={seg_path.name}  ({len(by_source)} labels, {len(by_id)} bodies)")
+    print(f"{doc_key}  segments={seg_path.name}  ({len(by_source)} labels, {len(by_id)} bodies, "
+          f"{len(by_header)} header-keyed)")
     for p in pages:
-        render_page(src, p, lang, by_source, by_id, doc_key)
+        render_page(src, p, lang, by_source, by_id, by_header, doc_key)
 
 
 if __name__ == "__main__":
