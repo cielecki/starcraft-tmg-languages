@@ -27,7 +27,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SEG_DIR = ROOT / "data" / "segments"
 HERE = Path(__file__).resolve().parent
 TERM_FILES = [HERE / "pl_terms.json", HERE / "pl_headers.json"]
-BODY_FILES = [HERE / "pl_bodies.json", HERE / "pl_bodies2.json", HERE / "pl_bodies3.json"]
+BODY_FILES = [HERE / "pl_bodies.json", HERE / "pl_bodies2.json", HERE / "pl_bodies3.json",
+              HERE / "pl_bodies4.json", HERE / "pl_bodies5.json"]
 
 P2P_DOCS = [
     "StarCraft-Protoss-P2P-Card-Sheets-A4_EN",

@@ -1,0 +1,55 @@
+{
+  "_comment": "PL translations for the dense LANDSCAPE tactical-card ability bodies (Protoss p7-9, Terran p7-9, Zerg p12-15) that the extractor body-grouping fix newly captures cleanly. Keyed by EXACT EN source_text; **...** marks the source-bold game terms. Glossary-consistent with pl.csv and the existing pl_bodies*.json. See extract_segments._assign_landscape.",
+
+  "If there is no Friendly Pylon on the battlefield, set a Friendly Pylon Unit anywhere on the GROUND LEVEL of the battlefield more than 10\" away from any Enemy model. This Round, the Pylon is not eligible to use its Special Abilities (excluding Structure).": "Jeśli na polu bitwy nie ma **sojuszniczego Pylonu**, umieść jednostkę **sojuszniczego Pylonu** w dowolnym miejscu na **POZIOMIE NAZIEMNYM** pola bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. W tej rundzie **Pylon** nie może używać swoich **Zdolności specjalnych** (z wyjątkiem **Budowli**).",
+
+  "The active Unit gains BUFF Speed (2).": "Aktywna jednostka zyskuje **WZMOCNIENIE Szybkości (2)**.",
+
+  "At the end of the active Unit’s Activation, select one other Friendly Unit eligible to Activate in the current Phase. Immediately Activate that Unit.": "Na koniec **Aktywacji** aktywnej jednostki wybierz jedną inną **sojuszniczą** jednostkę mogącą **Aktywować** się w obecnej Fazie. Natychmiast **Aktywuj** tę jednostkę.",
+
+  "The active GROUND Unit Deploys from any table edge that is not a player’s Entry Edge. This deployment must end more than 10\" away from any Enemy model. The controlling player cannot use this ability if another Friendly Ground Unit has already Deployed this Round.": "Aktywna jednostka **NAZIEMNA** **Rozmieszcza się** z dowolnej krawędzi stołu niebędącej **Krawędzią wejścia** gracza. To rozmieszczenie musi zakończyć się dalej niż **10\"** od dowolnego **wrogiego** modelu. Gracz kontrolujący nie może użyć tej zdolności, jeśli inna **sojusznicza jednostka Naziemna** już się **Rozmieściła** w tej rundzie.",
+
+  "Use when an Enemy Unit enters the battlefield from Reserves via a location other than its own Entry Edge. That Unit immediately suffers HITS 3 (1).": "Użyj, gdy **wroga** jednostka wchodzi na pole bitwy z **Rezerw** przez miejsce inne niż jej własna **Krawędź wejścia**. Ta jednostka natychmiast otrzymuje **TRAFIENIA 3 (1)**.",
+
+  "The active, Unengaged Ground Unit is returned to Reserves instead of performing an action.": "Aktywna, **niezwiązana walką jednostka Naziemna** zostaje zwrócona do **Rezerw** zamiast wykonywania akcji.",
+
+  "Once per Game. Set a Faction Indicator anywhere on the battlefield. All Friendly Protoss Units Within 6\" of this Faction Indicator are removed from the battlefield and returned to Reserves.": "**Raz na grę.** Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy. Wszystkie **sojusznicze jednostki Protosów** w **promieniu 6\"** od tego **Wskaźnika frakcji** zostają usunięte z pola bitwy i zwrócone do **Rezerw.**",
+
+  "The active Ground Unit’s first Ranged Weapon used gains BUFF Range (4).": "Pierwsza użyta **Broń dystansowa** aktywnej jednostki **Naziemnej** zyskuje **WZMOCNIENIE Zasięgu (4)**.",
+
+  "Use before a Friendly Ground Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.": "Użyj, zanim **sojusznicza jednostka Naziemna** wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** na ten rzut.",
+
+  "The active Unit’s first Weapon used gains INSTANT.": "Pierwsza użyta **Broń** aktywnej jednostki zyskuje **NATYCHMIASTOWY**.",
+
+  "The active Ground Unit’s first Ranged Weapon used gains CRITICAL HIT (1).": "Pierwsza użyta **Broń dystansowa** aktywnej jednostki **Naziemnej** zyskuje **TRAFIENIE KRYTYCZNE (1)**.",
+
+  "Once per Round, when a Friendly Support Unit activates a Special Ability that costs CP, resolve that ability with its CP cost reduced by 1 (to a minimum of 0). Do not Exhaust this card.": "**Raz na rundę**, gdy **sojusznicza jednostka Wsparcia** aktywuje **Zdolność specjalną** kosztującą **PD**, rozpatrz tę zdolność z kosztem **PD** zmniejszonym **o 1** (do minimum 0). Nie **Wyczerpuj** tej karty.",
+
+  "The active Unit’s Supply Value is improved by 1 for Controlling and Contesting Mission Markers and completing objectives.": "Wartość Zaopatrzenia aktywnej jednostki jest zwiększona **o 1** przy Kontrolowaniu i Kontestowaniu **Znaczników misji** oraz wypełnianiu celów.",
+
+  "Set a Faction Indicator anywhere on the battlefield more than 10\" away from any Enemy model. At the End of the Round, the controlling player may Deploy one Ground Unit from Reserves in base-to-base contact with this Faction Indicator.": "Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. Na **Końcu rundy** gracz kontrolujący może **Rozmieścić** jedną jednostkę **Naziemną** z **Rezerw** w **kontakcie podstawkami** z tym **Wskaźnikiem frakcji**.",
+
+  "Once Per Game. The active Unit resolves the PLACE (12) effect. Models set by this effect cannot be set up Within the Engagement Range of any Enemy Unit. This resolves instead of performing a standard action.": "**Raz na grę.** Aktywna jednostka rozpatruje efekt **UMIESZCZENIE (12)**. Modele ustawione tym efektem nie mogą zostać umieszczone **w** **Zasięgu związania** żadnej **wrogiej** jednostki. Rozpatruje się to zamiast wykonywania standardowej akcji.",
+
+  "The active Mechanical Unit resolves the HEAL (2) effect.": "Aktywna jednostka **Mechaniczna** rozpatruje efekt **LECZENIE (2)**.",
+
+  "The active Biological Unit’s first Ranged Weapon used gains ANTI-EVADE (1).": "Pierwsza użyta **Broń dystansowa** aktywnej jednostki **Biologicznej** zyskuje **ANTY-UNIK (1)**.",
+
+  "Use before a Friendly Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.": "Użyj, zanim **sojusznicza** jednostka wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** na ten rzut.",
+
+  "Use after a Friendly Unit rolls a D6 for Charge Distance. Roll an additional D6 and use the higher result to calculate the total Charge Distance.": "Użyj po tym, jak **sojusznicza** jednostka rzuci **K6** na **Dystans szarży**. Rzuć dodatkową **K6** i użyj wyższego wyniku do obliczenia całkowitego **Dystansu szarży**.",
+
+  "The active Unit’s first Ranged Weapon used gains PRECISION (1).": "Pierwsza użyta **Broń dystansowa** aktywnej jednostki zyskuje **PRECYZJĘ (1)**.",
+
+  "If the active Friendly Zerg Unit declares a Charge action while ON CREEP, it gains +1 Modifier to IMPACT Hit Rolls.": "Jeśli aktywna **sojusznicza jednostka Zergów** deklaruje akcję **Szarży** będąc **NA BIOMASIE**, zyskuje **+1 do Modyfikatora Rzutów na trafienie UDERZENIA**.",
+
+  "During Army Building, you must select exactly one Creep Card and add it to your Army List, paying its listed cost (if any).": "Podczas **budowy armii** musisz wybrać dokładnie jedną **Kartę biomasy** i dodać ją do swojej **Listy armii**, płacąc jej podany koszt (jeśli istnieje).",
+
+  "If there is no Friendly Omega Worm on the battlefield, set a Friendly Omega Worm Unit anywhere on GROUND LEVEL of the battlefield, more than 10\" away from any Enemy model. This Round, the Omega Worm is not eligible to use its Special Abilities (excluding Structure).": "Jeśli na polu bitwy nie ma **sojuszniczego Robaka omega**, umieść jednostkę **sojuszniczego Robaka omega** w dowolnym miejscu na **POZIOMIE NAZIEMNYM** pola bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. W tej rundzie **Robak omega** nie może używać swoich **Zdolności specjalnych** (z wyjątkiem **Budowli**).",
+
+  "The active Ground Unit loses the Burrowed Status.": "Aktywna jednostka **Naziemna** traci status **Zagrzebana**.",
+
+  "The active Unit’s Close Combat Weapons gain INSTANT.": "**Bronie do walki wręcz** aktywnej jednostki zyskują **NATYCHMIASTOWY**.",
+
+  "Set a Creep Tumor token on the battlefield Within 6\" (Line of Sight is not required) of either a Friendly Entry Edge or an existing Friendly Creep Tumor token.": "Umieść żeton **Tumora biomasy** na polu bitwy **w promieniu 6\" (Linia wzroku** nie jest wymagana) od **sojuszniczej Krawędzi wejścia** lub istniejącego żetonu **sojuszniczego Tumora biomasy**."
+}
