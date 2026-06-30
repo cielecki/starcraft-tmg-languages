@@ -63,6 +63,43 @@ def is_header_span(s):
     return ("CondensedExtraB" in s["font"] and t.endswith(":") and t == t.upper()
             and len(t) > 3 and any(c.isalpha() for c in t) and 5.5 < s["sz"] < 9)
 
+
+def merge_split_colon_headers(spans):
+    """Some ability names are typeset CondensedBOLD (not ExtraBold) with the trailing ':' as its OWN
+    tiny ExtraBold span — e.g. Zerg 'FERAL RAGE' (Bold) + ':' (ExtraB). Neither half is an
+    is_header_span on its own (the name lacks ExtraBold, the ':' is too short), so the ability would
+    have no anchor and its body would never be redacted/reflowed (leftover EN). Merge a lone
+    ExtraBold ':' span into an immediately-preceding Bold ALL-CAPS run on the same reading-line so it
+    becomes one recognisable header span ('FERAL RAGE:'). Returns a new span list."""
+    out = list(spans)
+    colons = [s for s in out if s["t"] == ":" and "CondensedExtraB" in s["font"]]
+    for c in colons:
+        code = c["dir"]
+        clb = _logical_box(c, code); ccy = (clb[1]+clb[3])/2
+        best = None
+        for s in out:
+            if s is c or s["dir"] != code or not s["t"]:
+                continue
+            if "Bold" not in s["font"] and "ExtraB" not in s["font"]:
+                continue
+            if s["t"] != s["t"].upper() or not any(ch.isalpha() for ch in s["t"]):
+                continue
+            slb = _logical_box(s, code)
+            if abs((slb[1]+slb[3])/2 - ccy) > 3:               # same reading-line
+                continue
+            if 0 <= clb[0] - slb[2] < 6:                       # ':' just to the logical right of name
+                if best is None or slb[2] > _logical_box(best, code)[2]:
+                    best = s
+        if best is None:
+            continue
+        merged = dict(best)
+        merged["t"] = best["t"].rstrip() + ":"
+        merged["font"] = "NotoSans-CondensedExtraB"            # so is_header_span accepts it
+        merged["bb"] = [min(best["bb"][0], c["bb"][0]), min(best["bb"][1], c["bb"][1]),
+                        max(best["bb"][2], c["bb"][2]), max(best["bb"][3], c["bb"][3])]
+        out.remove(best); out.remove(c); out.append(merged)
+    return out
+
 # Glossary KEYWORDS — bolded automatically wherever they occur in a body (the source bolds these
 # game terms; deriving from a keyword list instead of hand-marking <b> means we never miss one).
 # Longest-first so multi-word terms win. As the real glossary grows this list comes from it.
@@ -117,25 +154,79 @@ def is_icon_span(t):
 
 
 def avail_width(s, spans):
-    """Free space in the reading direction up to the next span on the same line (so a longer PL
-    label grows into empty bar space instead of shrinking or centring onto an icon)."""
-    x0, y0, x1, y1 = s["bb"]; cy = (y0+y1)/2
-    if s["dir"] >= 0:
-        edges = [o["bb"][0] for o in spans if o is not s
-                 and abs((o["bb"][1]+o["bb"][3])/2-cy) < 4 and o["bb"][0] >= x1-0.5]
-        return (min(edges) if edges else x1+110) - s["org"][0] - 1
-    edges = [o["bb"][2] for o in spans if o is not s
-             and abs((o["bb"][1]+o["bb"][3])/2-cy) < 4 and o["bb"][2] <= x0+0.5]
-    return s["org"][0] - (max(edges) if edges else x0-110) - 1
+    """Free space in the reading direction up to the next span on the same reading-line (so a longer
+    PL label grows into empty bar space instead of shrinking or centring onto an icon). Worked in the
+    span's own LOGICAL frame so it holds for all 4 print orientations."""
+    code = s["dir"]
+    lb = _logical_box(s, code); lcy = (lb[1]+lb[3])/2
+    lox = page_to_logical(s["org"][0], s["org"][1], code)[0]    # logical x of the baseline origin
+    edges = []
+    for o in spans:
+        if o is s or o["dir"] != code:
+            continue
+        ob = _logical_box(o, code)
+        if abs((ob[1]+ob[3])/2 - lcy) < 4 and ob[0] >= lb[2]-0.5:   # next span to the logical right
+            edges.append(ob[0])
+    return (min(edges) if edges else lb[2]+110) - lox - 1
+
+
+# ── 4-orientation reading frame (cards print at 0/90/180/270°) ─────────────────────────────────
+# The print sheets carry FOUR card orientations. A span's reading-direction CODE (0/90/180/270) is
+# read from the line's unit dir vector exactly as the extractor does (span_dir), and every geometry
+# step works in the span's own LOGICAL reading frame (left->right, top->bottom) so one derivation
+# handles all four. PAGE_W/PAGE_H are set per page in render_page before any transform.
+PAGE_W = 595.3
+PAGE_H = 841.9
+
+
+def span_dir(line):
+    """Reading-direction code from the line's unit dir vector (matches extract_segments.span_dir):
+       0   -> (1,0)   normal left->right
+       180 -> (-1,0)  upside-down (front cards on the fold sheet)
+       90  -> (0,-1)  rotated, reads bottom->top   (landscape tactical/faction sheets)
+       270 -> (0,1)   rotated, reads top->bottom."""
+    dx, dy = line.get("dir", (1, 0))
+    if abs(dx) >= abs(dy):
+        return 0 if dx >= 0 else 180
+    return 90 if dy < 0 else 270
+
+
+def page_to_logical(x, y, code):
+    """Page point -> the span's reading frame (so every orientation reads left->right, top->bottom).
+    Mirrors extract_segments.to_logical, keyed on the page dimensions PAGE_W/PAGE_H."""
+    if code == 0:
+        return x, y
+    if code == 180:
+        return PAGE_W - x, PAGE_H - y
+    if code == 90:                       # page (0,-1): logical right = page up, logical down = page right
+        return PAGE_H - y, x
+    return y, PAGE_W - x                  # 270, page (0,1): logical right = page down, logical down = page left
+
+
+def logical_to_page(lx, ly, code):
+    """Inverse of page_to_logical — place a point computed in the reading frame back onto the page."""
+    if code == 0:
+        return lx, ly
+    if code == 180:
+        return PAGE_W - lx, PAGE_H - ly
+    if code == 90:                       # x = ly, y = PAGE_H - lx
+        return ly, PAGE_H - lx
+    return PAGE_W - ly, lx                # 270: x = PAGE_W - ly, y = lx
+
+
+def logical_rect_to_page(lx0, ly0, lx1, ly1, code):
+    """A logical [x0,y0,x1,y1] reflow rect -> the page Rect that, with rotate=code, lays the text out
+    in that reading frame. Transform both corners and take the bounding box."""
+    ax, ay = logical_to_page(lx0, ly0, code)
+    bx, by = logical_to_page(lx1, ly1, code)
+    return fitz.Rect(min(ax, bx), min(ay, by), max(ax, bx), max(ay, by))
 
 
 def to_logical(x, y, block, rot):
-    """Map a page point into the body's reading frame (identity for rot 0; 180deg about the block
-    centre for the upside-down front card) so one derivation handles both orientations."""
-    if rot == 0:
-        return x, y
-    cx, cy = (block[0]+block[2])/2, (block[1]+block[3])/2
-    return 2*cx - x, 2*cy - y
+    """[deprecated shim] Page point -> reading frame using the global page-dimension transform.
+    Kept so derive_body's call sites read unchanged; `block` is ignored (the frame is page-based now),
+    `rot` is the span's direction code."""
+    return page_to_logical(x, y, rot)
 
 
 def derive_body(bs, block, rot):
@@ -183,16 +274,17 @@ def find_container(conts, bb):
     return min(cand, key=lambda r: r.width*r.height) if cand else None
 
 
-def _logical_box(s, cx, cy, rot):
-    """A span's [x0,y0,x1,y1] mapped into the reading frame (180deg about cx,cy for rot 180)."""
-    if rot == 0:
-        return list(s["bb"])
-    return [2*cx - s["bb"][2], 2*cy - s["bb"][3], 2*cx - s["bb"][0], 2*cy - s["bb"][1]]
+def _logical_box(s, code):
+    """A span's [x0,y0,x1,y1] mapped into its reading frame (page-dimension transform, all 4 orients).
+    Corners are transformed and re-ordered so the result is a proper [x0<=x1, y0<=y1] logical box."""
+    ax, ay = page_to_logical(s["bb"][0], s["bb"][1], code)
+    bx, by = page_to_logical(s["bb"][2], s["bb"][3], code)
+    return [min(ax, bx), min(ay, by), max(ax, bx), max(ay, by)]
 
 
-def _header_panel_x(page, hx, hy):
+def _header_panel_rect(page, hx, hy):
     """If a SMALL filled panel (grey #dadad9 sub-panel or a narrow white card cell) tightly encloses
-    the header point, return its (x0,x1) — the exact body column for side-by-side abilities. Skips
+    the header point, return its page Rect — the exact body column for side-by-side abilities. Skips
     the page background and full-card panels (too wide to disambiguate columns)."""
     best = None
     for d in page.get_drawings():
@@ -203,7 +295,14 @@ def _header_panel_x(page, hx, hy):
         if r.x0-1 <= hx <= r.x1+1 and r.y0-1 <= hy <= r.y1+1 and 40 < r.width < 300 and 12 < r.height < 220:
             if best is None or r.get_area() < best.get_area():
                 best = r
-    return (best.x0, best.x1) if best is not None else None
+    return best
+
+
+def _logical_x_range(rect, code):
+    """The logical-x extent (column axis in the reading frame) of a page rect, for all 4 orients."""
+    xs = [page_to_logical(rect.x0, rect.y0, code)[0], page_to_logical(rect.x1, rect.y0, code)[0],
+          page_to_logical(rect.x0, rect.y1, code)[0], page_to_logical(rect.x1, rect.y1, code)[0]]
+    return min(xs), max(xs)
 
 
 def _assign_bodies(spans, page=None):
@@ -220,55 +319,74 @@ def _assign_bodies(spans, page=None):
     prose = [s for s in spans
              if not is_header_span(s) and not is_not_body(s) and not is_icon_span(s["t"])]
 
-    def hbox(h):  # header logical box in its OWN frame (pivot = header centre)
+    def hbox(h):  # header logical box in its OWN reading frame (page-dimension transform)
+        code = h["dir"]
+        lb = _logical_box(h, code)
         cx = (h["bb"][0]+h["bb"][2])/2; cy = (h["bb"][1]+h["bb"][3])/2
-        rot = 0 if h["dir"] >= 0 else 180
-        return cx, cy, rot, _logical_box(h, cx, cy, rot)
+        return cx, cy, code, lb
 
-    # Reading order = block order (front card first, then top-to-bottom, then left-to-right). Each
-    # ability greedily CONSUMES its contiguous lines so a neighbour can't re-grab them.
-    order = sorted(headers, key=lambda h: (0 if h["dir"] < 0 else 1,
-                                           round((h["bb"][1]+h["bb"][3])/2, 1), round(h["bb"][0], 1)))
+    # Reading order = block order (front card first, then top-to-bottom, then left-to-right), worked
+    # in each header's own logical frame. Each ability greedily CONSUMES its contiguous lines so a
+    # neighbour can't re-grab them.
+    def horder_key(h):
+        lb = _logical_box(h, h["dir"])
+        return (h["dir"], round((lb[1]+lb[3])/2, 1), round(lb[0], 1))
+    order = sorted(headers, key=horder_key)
+    # Logical baselines of OTHER headers in the same frame — a body must not flow PAST the next
+    # header in its column (that is where the neighbour's block begins). Keyed per direction code.
     consumed = set()
     for h in order:
-        cx, cy, rot, hlb = hbox(h)
+        cx, cy, code, hlb = hbox(h)
         hx0, hx1, htop, hby = hlb[0], hlb[2], hlb[1], hlb[3]
         hcx = (hx0+hx1)/2
         # COLUMN bounds: prefer the EXACT column of a small filled panel enclosing the header (the grey
         # side-by-side sub-panel). Else, if another header shares this header's line (side-by-side
         # abilities), split at the midpoint to that neighbour. Else span the card width.
         col_l, col_r = hcx-260, hcx+260
-        px = _header_panel_x(page, (h["bb"][0]+h["bb"][2])/2, (h["bb"][1]+h["bb"][3])/2) if page else None
-        if px is not None:
-            lx = [2*cx-px[1], 2*cx-px[0]] if rot == 180 else [px[0], px[1]]  # panel x in logical frame
-            col_l, col_r = min(lx)-3, max(lx)+3
+        prect = _header_panel_rect(page, (h["bb"][0]+h["bb"][2])/2, (h["bb"][1]+h["bb"][3])/2) if page else None
+        if prect is not None:
+            a, b = _logical_x_range(prect, code)               # panel's column axis in the logical frame
+            col_l, col_r = a-3, b+3
         else:
             for o in headers:
                 if o is h or o["dir"] != h["dir"]:
                     continue
-                ob = _logical_box(o, cx, cy, rot); ocy = (ob[1]+ob[3])/2; ocx = (ob[0]+ob[2])/2
+                ob = _logical_box(o, code); ocy = (ob[1]+ob[3])/2; ocx = (ob[0]+ob[2])/2
                 if abs(ocy - (htop+hby)/2) < 9:                 # same line -> a side-by-side neighbour
                     if ocx > hcx:
                         col_r = min(col_r, (hcx+ocx)/2)
                     else:
                         col_l = max(col_l, (hcx+ocx)/2)
-        # candidate prose: unconsumed, same dir, at/below header top, inside the column
+        # The next header DOWN in this column ends the body: a prose line at/below it belongs to that
+        # neighbour, never to us (this is what stopped a stray fragment of the next ability — e.g. the
+        # 'IMPACT' run of a full-width ability below a column — being swallowed and overlapping).
+        next_hdr_y = None
+        for o in headers:
+            if o is h or o["dir"] != h["dir"]:
+                continue
+            ob = _logical_box(o, code); ocy = (ob[1]+ob[3])/2; ocx = (ob[0]+ob[2])/2
+            if ocy > hby + 2 and col_l-2 <= ocx <= col_r+2:
+                next_hdr_y = ocy if next_hdr_y is None else min(next_hdr_y, ocy)
+        # candidate prose: unconsumed, same dir, at/below header top, inside the column, above the
+        # next header in the column.
         cand = []
         for s in prose:
             if id(s) in consumed or s["dir"] != h["dir"]:
                 continue
-            sb = _logical_box(s, cx, cy, rot); scy = (sb[1]+sb[3])/2; scx = (sb[0]+sb[2])/2
+            sb = _logical_box(s, code); scy = (sb[1]+sb[3])/2; scx = (sb[0]+sb[2])/2
             if scy < htop - 6 or not (col_l <= scx <= col_r):
+                continue
+            if next_hdr_y is not None and scy >= next_hdr_y - 2:   # belongs to the neighbour below
                 continue
             cand.append((scy, s))
         cand.sort(key=lambda t: t[0])
         if not cand:
             continue
         sizes = sorted(s["sz"] for _, s in cand)
-        lh = sizes[len(sizes)//2] * 1.7
+        line_adv = sizes[len(sizes)//2] * 1.55                  # a normal line-to-line advance
         prev = hby
         for scy, s in cand:
-            if scy - prev > lh + 4:                             # vertical gap -> the body has ended
+            if scy - prev > line_adv + 4:                       # vertical gap -> the body has ended
                 break
             members[id(h)].append(s); consumed.add(id(s))
             prev = max(prev, scy)
@@ -291,15 +409,15 @@ def detect_abilities(page, spans):
     for h in spans:
         if not is_header_span(h):
             continue
-        rot = 0 if h["dir"] >= 0 else 180
+        rot = h["dir"]                                          # 0/90/180/270 reading-direction code
         body = members[id(h)]
         xs = [v for s in [h]+body for v in (s["bb"][0], s["bb"][2])]
         ys = [v for s in [h]+body for v in (s["bb"][1], s["bb"][3])]
         block = [min(xs)-2, min(ys)-2, max(xs)+2, max(ys)+2]
-        hy = (h["bb"][1]+h["bb"][3])/2
+        hlb = _logical_box(h, rot)                              # reading order in the logical frame
         out.append({"block": block, "rot": rot, "header": h["t"], "_h": h,
                     "_body": body,
-                    "_sort": (0 if h["dir"] < 0 else 1, round(hy, 1), round(h["bb"][0], 1))})
+                    "_sort": (rot, round((hlb[1]+hlb[3])/2, 1), round(hlb[0], 1))})
     out.sort(key=lambda a: a["_sort"])
     for i, a in enumerate(out):
         a["index"] = i
@@ -370,7 +488,7 @@ def apply_bold(text, ranges):
 
 
 def draw(page, s, text, key=None, fit=None, avail=None):
-    key = key or pick(s["font"]); rot = 0 if s["dir"] >= 0 else 180
+    key = key or pick(s["font"]); rot = s["dir"]               # 0/90/180/270 reading-direction code
     if fit is not None:                       # PL overflows its slot -> fill + centre the container
         fs = s["sz"]
         while fs > 3.5 and FZ[key].text_length(text, fs) > fit.width*0.92:
@@ -389,13 +507,81 @@ def draw(page, s, text, key=None, fit=None, avail=None):
 
 
 def draw_pill(page, s, text, dx=0):
-    x0, y0, x1, y1 = s["bb"]; w = x1-x0; fs = s["sz"]
+    """Draw a centred pill label in the span's own reading frame (all 4 orientations). The pill is
+    centred along its reading axis: we shift the baseline origin by the centring offset projected
+    back onto the page in the right direction for the rotation code."""
+    rot = s["dir"]
+    x0, y0, x1, y1 = s["bb"]; fs = s["sz"]
+    # the pill's WIDTH along the reading axis (logical x-extent), so centring works for 90/270 too
+    lb = _logical_box(s, rot); w = lb[2]-lb[0]
     while fs > 3 and FZ["ext"].text_length(text, fs) > w * 0.98:
         fs -= 0.2
     tw = FZ["ext"].text_length(text, fs)
-    x = x0 + (w-tw)/2 if s["dir"] >= 0 else x1 - (w-tw)/2
-    page.insert_text((x+dx, s["org"][1]), text, fontsize=fs, fontname="ext", fontfile=FPATH["ext"],
-                     color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
+    off = (w - tw)/2                                            # centring offset along the reading axis
+    # the span origin maps to the left edge of the reading axis; advance by `off` along that axis
+    lox, loy = page_to_logical(s["org"][0], s["org"][1], rot)
+    px, py = logical_to_page(lox + off + dx, loy, rot)
+    page.insert_text((px, py), text, fontsize=fs, fontname="ext", fontfile=FPATH["ext"],
+                     color=rgb(s["c"]), rotate=rot)
+
+
+def is_scenario_subheader(s):
+    """A scenario/mission-card section sub-header: CondensedBlack UPPERCASE ':'-label (~8pt, dir 0).
+    These anchor the mission-card prose blocks (MISSION PARAMETERS:, SCORING CONDITIONS:, …), which
+    have NO ExtraBold ability header — mirror of extract_segments.is_scenario_subheader."""
+    t = s["t"]
+    return (s["dir"] == 0 and "CondensedBlack" in s["font"] and 7 <= s["sz"] <= 9
+            and t.rstrip().endswith(":") and t == t.upper() and len(t) > 4 and t not in PHASES)
+
+
+def _scenario_card_title(s, titles):
+    sx = (s["bb"][0]+s["bb"][2])/2
+    cand = [t for t in titles if t["bb"][1] <= s["bb"][1]+2 and abs((t["bb"][0]+t["bb"][2])/2-sx) < 150]
+    if not cand:
+        cand = [t for t in titles if abs((t["bb"][0]+t["bb"][2])/2-sx) < 150] or titles
+    return max(cand, key=lambda t: t["bb"][1])["t"] if cand else ""
+
+
+def detect_scenario_blocks(spans):
+    """AUTO-DETECT mission-card prose blocks (scenario sheets) — the parallel of detect_abilities for
+    cards anchored by a CondensedBlack ':' sub-header instead of an ExtraBold ability header. Each
+    block = the prose in the sub-header's card column, from the sub-header down to the next sub-header
+    in that column. Returns blocks with rot 0, header = '<CARD TITLE> / <SUB>:' (matches the extractor
+    header_source), and _body = the assigned prose spans. Empty on non-scenario pages."""
+    subs = [s for s in spans if is_scenario_subheader(s)]
+    if not subs:
+        return []
+    titles = [s for s in spans if s["font"].startswith("Geogrotesque") and s["dir"] == 0
+              and s["sz"] >= 11 and s["t"].strip()]
+    prose = [s for s in spans
+             if s["dir"] == 0 and not is_header_span(s) and not is_not_body(s)
+             and not is_icon_span(s["t"]) and not is_scenario_subheader(s)
+             and "CondensedBlack" not in s["font"] and 5 < s["sz"] < 9]
+    subs_sorted = sorted(subs, key=lambda s: (round(s["bb"][1]), s["bb"][0]))
+    out = []
+    used = set()
+    for h in subs_sorted:
+        hx = (h["bb"][0]+h["bb"][2])/2
+        col_l, col_r = hx-48, hx+150         # sub-header is indented; body wraps a touch further left
+        next_y = min([o["bb"][1] for o in subs_sorted
+                      if o is not h and col_l <= (o["bb"][0]+o["bb"][2])/2 <= col_r
+                      and o["bb"][1] > h["bb"][3]+1], default=h["bb"][3]+260)
+        mem = [s for s in prose if id(s) not in used
+               and col_l <= (s["bb"][0]+s["bb"][2])/2 <= col_r
+               and h["bb"][1]-1 <= s["bb"][1] < next_y-1]
+        if not mem:
+            continue
+        for s in mem:
+            used.add(id(s))
+        xs = [v for s in mem for v in (s["bb"][0], s["bb"][2])]
+        ys = [v for s in mem for v in (s["bb"][1], s["bb"][3])]
+        block = [min(xs)-2, min(ys)-2, max(xs)+2, max(ys)+2]
+        title = _scenario_card_title(h, titles)
+        header = (title + " / " + h["t"].rstrip()) if title else h["t"].rstrip()
+        out.append({"block": block, "rot": 0, "header": header, "_h": h, "_body": mem})
+    for i, a in enumerate(out):
+        a["index"] = i
+    return out
 
 
 def doc_slug(src):
@@ -407,14 +593,17 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
     """Localize ONE page in place and write the PDF + PNG. Returns a small stats dict."""
     doc = fitz.open(ROOT / "sources/pdf" / src)
     page = doc[page_no]
+    global PAGE_W, PAGE_H
+    PAGE_W, PAGE_H = page.rect.width, page.rect.height
     spans = []
     for b in page.get_text("dict")["blocks"]:
         for l in b.get("lines", []):
-            dirx = round(l.get("dir", (1, 0))[0])
+            code = span_dir(l)                # 0 / 90 / 180 / 270 reading-direction (4 print orients)
             for s in l.get("spans", []):
                 if s["text"].strip():
                     spans.append({"t": s["text"].strip(), "bb": s["bbox"], "org": s["origin"],
-                                  "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
+                                  "c": s["color"], "sz": s["size"], "dir": code, "font": s["font"]})
+    spans = merge_split_colon_headers(spans)        # 'FERAL RAGE'(Bold)+':' -> one ExtraBold header
 
     conts = containers(page)
     abil = detect_abilities(page, spans)                        # AUTO-DETECT (was hardcoded ABILITIES)
@@ -450,6 +639,19 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
                 claimed.add(cand[0])
             else:
                 seg = by_id.get(f"{doc_key}:p{page_no}:ability:{a['index']}")
+        derived.append((a, g, bs, seg))
+    # Scenario / mission-card prose blocks (Black ':' sub-headers, no ExtraBold anchor) — match by
+    # the '<CARD TITLE> / <SUB>:' header_source, else the positional scenario id.
+    scen_blocks = detect_scenario_blocks(spans)
+    n_scen = 0
+    for a in scen_blocks:
+        g, bs = derive_body(a["_body"], a["block"], a["rot"])
+        h = (a["header"] or "").strip()
+        seg = page_headers.get(h)
+        if seg is None:
+            seg = by_id.get(f"{doc_key}:p{page_no}:scenario:{a['index']}")
+        if seg:
+            n_scen += 1
         derived.append((a, g, bs, seg))
     # Only blocks WITH a translation are redrawn; the rest keep their EN prose untouched.
     body_ids = {id(s) for (_, _, bs, seg) in derived if seg for s in bs}
@@ -499,15 +701,12 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
         n_bodies += 1
         fs = g["fs"]; lh = max(1.0, g["spacing"]/fs)
         y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line 1 on the original baseline
-        bottom = g["last"]+fs+2
-        if a["rot"] == 0:
-            bottom = min(bottom, a["block"][3]-1)              # keep the body inside the panel
+        # Keep the body inside its own block (in the LOGICAL frame, so it holds for all 4 orients):
+        # the block's logical bottom edge bounds how far the reflow may grow downward.
+        blb = _logical_box({"bb": a["block"]}, a["rot"])
+        bottom = min(g["last"]+fs+2, blb[3]-0.5)
         lrect = (g["left"]-0.5, y0, g["right"]+1, bottom)
-        if a["rot"] == 0:
-            rect = fitz.Rect(lrect)
-        else:                                                  # transform the logical rect to page
-            cx, cy = (a["block"][0]+a["block"][2])/2, (a["block"][1]+a["block"][3])/2
-            rect = fitz.Rect(2*cx-lrect[2], 2*cy-lrect[3], 2*cx-lrect[0], 2*cy-lrect[1])
+        rect = logical_rect_to_page(lrect[0], lrect[1], lrect[2], lrect[3], a["rot"])
         indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)
         body = seg["target_text"]
         inner = apply_bold(body, seg["bold"]) if seg["bold"] else auto_bold(body)
@@ -531,7 +730,11 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
             av = avail_width(s, spans)
             c = find_container(conts, s["bb"])                 # but never past the bar/segment edge
             if c:
-                av = min(av, (c.x1 - s["org"][0] - 2) if s["dir"] >= 0 else (s["org"][0] - c.x0 - 2))
+                code = s["dir"]
+                lox = page_to_logical(s["org"][0], s["org"][1], code)[0]
+                # the container's right edge in the logical reading frame
+                cl = [page_to_logical(c.x0, c.y0, code)[0], page_to_logical(c.x1, c.y1, code)[0]]
+                av = min(av, max(cl) - lox - 2)
             draw(page, s, pl, avail=av)
         else:                                                  # table cells / fixed slots -> fit own slot
             draw(page, s, pl)
@@ -543,7 +746,8 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
     one.save(pdf)
     fitz.open(pdf)[0].get_pixmap(dpi=200).save(out / f"{stem}.png")
     print(f"  p{page_no}: blocks={len(abil)} targets={len(targets)} collateral={len(collateral)} "
-          f"bodies={n_bodies}/{len(abil)} (hdr={n_header_match}+contain={n_contain_match}) -> {pdf.name}")
+          f"bodies={n_bodies}/{len(abil)+len(scen_blocks)} (hdr={n_header_match}+contain={n_contain_match}"
+          f"+scen={n_scen}/{len(scen_blocks)}) -> {pdf.name}")
     return {"blocks": len(abil), "targets": len(targets), "bodies": n_bodies,
             "header_match": n_header_match, "contain_match": n_contain_match}
 
