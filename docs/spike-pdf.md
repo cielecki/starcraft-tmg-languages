@@ -4,8 +4,28 @@ Date: 2026-06-30. Question: can we regenerate localized PDFs acceptably, and how
 type? Tested on **rulebook page 6** (designed two-column page) and **Protoss P2P card sheet
 page 0** (unit cards). Throwaway code in scratch; sample renders not committed (Archon artwork).
 
-## Verdict: viable. The right approach is **different per document type** — and it's the
-**opposite** of the naive assumption ("cards easy, rulebook hard").
+## REVISION (2026-06-30, after maintainer review)
+Maintainer requirement: **preserve the original layout/art exactly — edit the real PDF in place,
+for BOTH cards and the rulebook** (do not rebuild cards from scratch). This is now proven for both,
+and it hinges on one technique fix:
+
+- **Erase with TEXT-ONLY redaction, not a flat fill.** `apply_redactions(text=PDF_REDACT_TEXT_REMOVE,
+  graphics=PDF_REDACT_LINE_ART_NONE, images=PDF_REDACT_IMAGE_NONE)` removes only the glyphs and keeps
+  every gradient/panel/photo. The earlier flat-fill erase left **grey patches** (it painted
+  rectangles that didn't match the page's full-page background image). Fixed.
+- **Reinsert with the ORIGINAL span colour, size, and rotation.** Guessed colours made text invisible
+  (rulebook body is dark `#1d1d1b` on a light hex background; title is purple `#54277c`). The P2P
+  card sheet prints each card twice — one normal (`dir(1,0)`), one **180° rotated** (`dir(-1,0)`) —
+  so reinsert with `rotate=0/180` to match.
+- Result: `scripts/generate/rulebook_page.py` (region reflow) and `scripts/generate/card_inplace.py`
+  (rotation-aware per-label) both edit the real PDFs with the art fully preserved. `card.py`
+  (rebuild-from-JSON) is kept only as a fallback.
+- Remaining: reflow wrapped multi-span ability sentences on cards; per-page region models for all
+  128 rulebook pages; image-baked text (e.g. ABANDONED CAMP) needs overlay; SC-style PL fonts.
+
+---
+## Original verdict (component spike): different approach per document type
+(Superseded by the revision above for cards — kept for the reasoning.)
 
 ### Rulebook → in-place region-reflow ✅ (recommended)
 - **Erase** original text by painting the *sampled local background* over each text region, with
