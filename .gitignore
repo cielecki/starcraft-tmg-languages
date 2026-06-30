@@ -1,0 +1,39 @@
+# --- Copyrighted source & generated binaries: NEVER committed ---
+# Everything under sources/ is fetched on demand (scripts/fetch_sources.py).
+# Only the manifest + a README are tracked, so the repo stays tooling+text only.
+sources/*
+!sources/manifest.json
+!sources/README.md
+!sources/.gitkeep
+
+# Raw game-extracted strings (license-sensitive, large). Only the distilled
+# EN->PL glossary term pairs are committed, never the raw CASC/MPQ dumps.
+corpus/raw/
+*.casc
+*.mpq
+
+# Generated / translated output PDFs (re-buildable from committed text)
+build/
+out/
+**/*_PL.pdf
+**/*_DE.pdf
+**/*_ES.pdf
+**/*_FR.pdf
+**/*_KO.pdf
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# --- Node ---
+node_modules/
+dist/
+
+# --- OS / editor ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
