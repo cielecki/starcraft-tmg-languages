@@ -2,6 +2,8 @@
   "_meta": "Curated EN->PL for ability headers and weapon-title headers (merged into pl_terms at load). ':' is preserved. Ability names follow SC2 PL where a counterpart exists; TMG-original abilities are translated for sense and player familiarity.",
 
   ":": ":",
+  "SHREDDING CLAWS": "TNĄCE SZPONY",
+  "PIERCE Light (2)": "PRZEBICIE Lekki (2)",
 
   "RESONATING GLAVES:": "REZONUJĄCE GLEWIE:",
   "GUIDANCE:": "NAPROWADZANIE:",

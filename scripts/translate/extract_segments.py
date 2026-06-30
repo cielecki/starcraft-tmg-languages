@@ -220,8 +220,7 @@ def classify(s, weapon_baselines=None):
     # label — is table chrome, never prose.
     if weapon_baselines is not None and font.startswith("NotoSans-Condensed") and sz <= 9.5:
         ly = to_logical(s["org"][0], s["org"][1], s["dir"])[1]
-        if ((s["dir"], round(ly)) in weapon_baselines
-                or (s["dir"], round(ly - LINE_H)) in weapon_baselines):
+        if on_weapon_baseline(s["dir"], ly, weapon_baselines):
             return "cell"
     # remaining NotoSans-Condensed runs at body size -> prose-candidate (body)
     if font in PROSE_FONTS and 5.5 <= sz <= 9.5:
@@ -553,7 +552,11 @@ def merge_split_headers(headers):
 
 
 # --- per-page extraction -----------------------------------------------------
-LINE_H = 11.0   # weapon-table row pitch (value row -> FOR row), in logical pt
+LINE_H = 8.0    # weapon-table row pitch: VALUE row -> 'FOR' row, in logical pt (measured at 8.0
+                # across every strike table on all 3 sheets; the old 11.0 missed the value baseline
+                # by ~3pt so CondensedBold-titled rows — GLAIVE STRIKE, PIERCE Light (2) — leaked
+                # into the prose stream and rendered untranslated).
+WEAPON_BL_TOL = 2   # match a span to a weapon baseline within ±this many pt (absorbs rounding drift)
 
 
 def weapon_title_baselines(spans):
@@ -564,7 +567,7 @@ def weapon_title_baselines(spans):
     label one line below. The title is set in either CondensedExtraB (e.g. STRIKE, GLAIVE
     CANNON) OR CondensedBold (e.g. GLAIVE STRIKE, SHREDDING CLAWS). We anchor on:
       (a) ExtraB all-caps titles (the value cells share their baseline), and
-      (b) the value baseline implied by every 'FOR' italic marker (one line above it) —
+      (b) the value baseline implied by every 'FOR' italic marker (LINE_H above it) —
           this catches the CondensedBold-titled strike rows, which always carry a FOR row.
     Both signals are specific to weapon stat-tables, so prose lines (which never carry a
     'FOR' italic nor an ExtraB-non-':' title on the same baseline) are left alone.
@@ -574,10 +577,21 @@ def weapon_title_baselines(spans):
         t, font = s["t"], s["font"]
         ly = to_logical(s["org"][0], s["org"][1], s["dir"])[1]
         if font == "NotoSans-CondensedExtraB" and t.isupper() and not t.rstrip().endswith(":"):
-            out.add((s["dir"], round(ly)))
+            out.add((s["dir"], round(ly)))                 # value row (ExtraB-titled)
         if t == "FOR" and font == "NotoSans-CondensedItalic":
-            out.add((s["dir"], round(ly - LINE_H)))   # value row is one line above the FOR
+            out.add((s["dir"], round(ly)))                 # the FOR-label row itself
+            out.add((s["dir"], round(ly - LINE_H)))        # value row is LINE_H above the FOR
     return out
+
+
+def on_weapon_baseline(d, ly, weapon_baselines):
+    """True iff logical baseline `ly` (dir `d`) is EXACTLY a registered weapon-table row (a value row
+    or its FOR-label row). Both row baselines are registered explicitly by weapon_title_baselines, so
+    we match the rounded baseline directly — NO ±LINE_H fuzz here. The old fuzzy `(ly - LINE_H)`
+    test mis-classified an ordinary prose line that merely sat one line-pitch ABOVE a value row as
+    table chrome (it broke a Terran/Zerg ability body), so the offset belongs only in the set
+    construction, applied to the FOR marker, never to the span being classified."""
+    return (d, round(ly)) in weapon_baselines
 
 
 def _logical_box(s):
