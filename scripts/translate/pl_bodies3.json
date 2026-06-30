@@ -1,0 +1,204 @@
+{
+  "_meta": "PL ability-body translations, batch 3 (Zerg unit + tactical/creep cards). Same conventions. A few entries (Omega Worm / Creep tactical cards on rotated grid sheets) translate source-order-interleaved text faithfully; flagged best-effort.",
+
+  "If this Unit has Stationary Status, it is eligible to make an Evade Roll against the first Ranged Attack targeting it this Round. If this Unit is ON CREEP, it gains +1 Modifier to this Evade Roll.":
+    "Jeśli ta jednostka ma status **Nieruchoma**, może wykonać **Rzut na unik** przeciwko pierwszemu **Atakowi dystansowemu** obierającemu ją za cel w tej rundzie. Jeśli ta jednostka jest **NA BIOMASIE**, zyskuje **+1 Modyfikator** do tego **Rzutu na unik**.",
+
+  "This Unit gains TOUGH (1) on the first Armour Roll of each Activation.":
+    "Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** przy pierwszym **Rzucie na pancerz** w każdej **Aktywacji**.",
+
+  "When this Unit is nominated to deploy from the Reserves, it may resolve the PLACE (18) effect from the controlling player's Entry Edge. No model may be set Within 10\" of any Enemy model. This Unit's Activation ends.":
+    "Gdy ta jednostka zostaje wyznaczona do rozmieszczenia z **Rezerw**, może rozpatrzyć efekt **UMIESZCZENIE (18)** z **Krawędzi wejścia** gracza kontrolującego. Żaden model nie może zostać ustawiony **w promieniu 10\"** od dowolnego **wrogiego** modelu. **Aktywacja** tej jednostki się kończy.",
+
+  "When another Friendly Unit Within 10\" is the target of a Ranged Attack, after the attack is fully resolved, this Unit, if Unengaged, may perform a Move action Directly Towards the attacking Unit.":
+    "Gdy inna **sojusznicza** jednostka **w promieniu 10\"** jest celem **Ataku dystansowego**, po całkowitym rozpatrzeniu ataku ta jednostka, jeśli jest **niezwiązana walką**, może wykonać akcję **Ruchu Bezpośrednio w stronę** atakującej jednostki.",
+
+  "This Unit's Needle Spines ranged weapon gains LONG RANGE (16\").":
+    "Broń dystansowa **Kolce iglaste** tej jednostki zyskuje **DALEKI ZASIĘG (16\")**.",
+
+  "Select one Enemy Unit Within 12\" counts as Activated in this Phase (set an Marker next to it).":
+    "Wybierz jedną **wrogą** jednostkę **w promieniu 12\"** — liczy się ona jako **Aktywowana** w tej fazie (umieść przy niej **Znacznik**).",
+
+  "Select one. That Unit Enemy Unit Within 18\". This Unit is eligible to make Activation an Evade Roll against all attacks made by the selected Enemy Unit, with a +2 Modifier applied to those Evade Rolls. Armoured":
+    "Wybierz jedną **wrogą** jednostkę **w promieniu 18\"**. Ta jednostka może wykonać **Rzut na unik** przeciwko wszystkim atakom wykonanym przez wybraną **wrogą** jednostkę, z **+2 Modyfikatorem** zastosowanym do tych **Rzutów na unik**. Opancerzony",
+
+  "If Unengaged, resolve the PLACE (6) effect.":
+    "Jeśli **niezwiązana walką**, rozpatrz efekt **UMIESZCZENIE (6)**.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (4) 4+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (4) 4+**.",
+
+  "While Enemy Units are Within 6\" of this Unit, they lose HIDDEN Status.":
+    "Dopóki **wrogie** jednostki są **w promieniu 6\"** od tej jednostki, tracą status **UKRYTA**.",
+
+  "The base of the Omega Worm counts as an Entry Edge. Each Round, Friendly Units":
+    "Podstawka **Robaka omega** liczy się jako **Krawędź wejścia**. W każdej rundzie **sojusznicze** jednostki",
+
+  "with a combined Supply cost of 2 or less may be Deployed A Friendly or Enemy Ground via this Entry Edge. Zerg Unit Within 6\" of this Unit, counts as being ON CREEP.":
+    "o łącznym koszcie **Zaopatrzenia 2** lub niższym mogą zostać **Rozmieszczone** **Sojusznicza lub wroga jednostka Naziemna** przez tę **Krawędź wejścia**. **Zergów w promieniu 6\"** od tej jednostki liczy się jako będąca **NA BIOMASIE**.",
+
+  "If a Friendly Leading model finishes a Move, Disengage, or This Unit cannot be Activated in Run action in base-to-base contact with the Omega Worm, any Phase and cannot perform actions. Additionally, its the controlling player may remove that Unit from the Current Supply Value is treated as 0, and it can never battlefield and return it to Reserves. Control or Contest Mission Markers, ignoring the standard Zero Supply Exception. This Unit cannot be a target of an ability, unless stated otherwise.":
+    "Jeśli **sojuszniczy model prowadzący** zakończy akcję **Ruchu, Rozłączenia** lub Ta jednostka nie może zostać **Aktywowana** w **Biegu** w **kontakcie podstawkami** z **Robakiem omega**, żadnej fazie i nie może wykonywać akcji. Dodatkowo jej gracz kontrolujący może usunąć tę jednostkę z **Bieżąca wartość zaopatrzenia** jest traktowana **jako 0** i nigdy nie może pola bitwy i zwrócić ją do **Rezerw**. kontrolować ani kontestować **Znaczników misji**, ignorując standardowy **Wyjątek zerowego zaopatrzenia**. Ta jednostka nie może być celem zdolności, chyba że wskazano inaczej.",
+
+  "This Unit can move through IMPASSABLE TERRAIN of Size 4 or less and change elevation without using ACCESS POINTS.":
+    "Ta jednostka może przemieszczać się przez **TEREN NIEPRZEBYTY** o **Rozmiarze 4** lub mniejszym i zmieniać wysokość bez korzystania z **PUNKTÓW DOSTĘPU**.",
+
+  "When determining Charge Distance for this Unit, add 2 to the Charge Distance.":
+    "Przy ustalaniu **Dystansu szarży** tej jednostki dodaj **2** do **Dystansu szarży**.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (2) 5+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (2) 5+**.",
+
+  "This Unit gains a +1 Modifier to all IMPACT Hit Rolls. Armoured":
+    "Ta jednostka zyskuje **+1 Modyfikator** do wszystkich **Rzutów na trafienie UDERZENIA**. Opancerzony",
+
+  "Set a Creep Tumor token in base-to-base contact with":
+    "Umieść żeton **Tumora biomasy** w **kontakcie podstawkami** z",
+
+  "While this Unit is ON CREEP, increase this Unit's Speed characteristic by 2.":
+    "Dopóki ta jednostka jest **NA BIOMASIE**, zwiększ cechę **Szybkość** tej jednostki **o 2**.",
+
+  "Once per Round, if there are at least 7 Friendly models Within 6\" of this Unit, it may resolve its Special Ability with the BM cost reduced by 1. Armoured":
+    "**Raz na rundę**, jeśli co najmniej **7 sojuszniczych** modeli znajduje się **w promieniu 6\"** od tej jednostki, może ona rozpatrzyć swoją **Zdolność specjalną** z kosztem **ZB** obniżonym **o 1**. Opancerzony",
+
+  "this Unit. Use when another Friendly Biological Unit (including a Structure) suffers Damage Within 4\". Reduce the Total Damage before allocation by 2.":
+    "tej jednostki. Użyj, gdy inna **sojusznicza jednostka Biologiczna** (w tym **Budowla**) otrzymuje **Obrażenia w promieniu 4\"**. Zmniejsz **Całkowite obrażenia** przed ich przydzieleniem **o 2**.",
+
+  "Select another Friendly Unit Within 6\" ( Line of Sight is not required). That Unit’s Supply characteristic is increased by 1 for Controlling and Contesting Mission Markers and completing objectives.":
+    "Wybierz inną **sojuszniczą** jednostkę **w promieniu 6\"** (**Linia wzroku** nie jest wymagana). Cecha **Zaopatrzenie** tej jednostki jest zwiększona **o 1** przy kontrolowaniu i kontestowaniu **Znaczników misji** oraz wykonywaniu celów.",
+
+  "If this Unit is Unengaged, it gains or loses the Burrowed Status.":
+    "Jeśli ta jednostka jest **niezwiązana walką**, zyskuje lub traci status **Zagrzebana**.",
+
+  "While this Unit has the Burrowed Status, it may perform the Move and Run actions without losing that Status. It may also move through other Units’ bases.":
+    "Dopóki ta jednostka ma status **Zagrzebana**, może wykonywać akcje **Ruchu** i **Biegu** bez utraty tego **Statusu**. Może też przemieszczać się przez podstawki innych jednostek.",
+
+  "This Unit gains BUFF SPEED (1), or BUFF SPEED (2) if the Unit is ON CREEP.":
+    "Ta jednostka zyskuje **WZMOCNIENIE SZYBKOŚCI (1)** lub **WZMOCNIENIE SZYBKOŚCI (2)**, jeśli jednostka jest **NA BIOMASIE**.",
+
+  "When this Unit becomes Activated, if it has the Burrowed Status, resolve the HEAL (2) effect.":
+    "Gdy ta jednostka zostaje **Aktywowana**, jeśli ma status **Zagrzebana**, rozpatrz efekt **LECZENIE (2)**.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (2) 4+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (2) 4+**.",
+
+  "This Unit's Acid Saliva weapon gains Surge Type: Light, and S Dice: D3+1.":
+    "Broń **Kwasowa ślina** tej jednostki zyskuje **Typ nawały: Lekki** oraz **K nawały: D3+1**.",
+
+  "Once Per Game. Resolve the SUMMON (Roachling) effect.":
+    "**Raz na grę.** Rozpatrz efekt **PRZYWOŁANIE (Karaczek)**.",
+
+  "This Unit cannot gain Burrowed Status.":
+    "Ta jednostka nie może zyskać statusu **Zagrzebana**.",
+
+  "If this Unit is not Engaged, it gains or loses the Burrowed Status.":
+    "Jeśli ta jednostka nie jest **Związana walką**, zyskuje lub traci status **Zagrzebana**.",
+
+  "Use when an Enemy Unit Within 8\" of this Unit declares a Ranged Attack. Apply DEBUFF Hit (1) to each of that Unit's Ranged Weapons.":
+    "Użyj, gdy **wroga** jednostka **w promieniu 8\"** od tej jednostki deklaruje **Atak dystansowy**. Zastosuj **OSŁABIENIE Trafienia (1)** do każdej z **Broni dystansowych** tej jednostki.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (1) 4+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (1) 4+**.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (1) 5+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (1) 5+**.",
+
+  "This Unit’s Claws and Shredding Claws weapons gain PRECISION (2).":
+    "Bronie **Szpony** i **Tnące szpony** tej jednostki zyskują **PRECYZJĘ (2)**.",
+
+  "This Unit gains a +1 Modifier to all IMPACT Hit Rolls.":
+    "Ta jednostka zyskuje **+1 Modyfikator** do wszystkich **Rzutów na trafienie UDERZENIA**.",
+
+  "When determining Charge Distance for this Unit, roll 2D6 instead of D6 and use the higher result to add to the Unit’s Speed":
+    "Przy ustalaniu **Dystansu szarży** tej jednostki rzuć **2D6** zamiast **D6** i dodaj wyższy wynik do cechy **Szybkość** jednostki",
+
+  "characteristic. Immediately after this Unit completes a successful Charge, resolve the IMPACT (1) 5+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (1) 5+**.",
+
+  "Resolve the RESPAWN (2) effect, or RESPAWN (3) if the Unit is ON CREEP.":
+    "Rozpatrz efekt **ODRODZENIE (2)** lub **ODRODZENIE (3)**, jeśli jednostka jest **NA BIOMASIE**.",
+
+  "BM: 1 Use before a Friendly Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.":
+    "**ZB: 1** Użyj, zanim **sojusznicza** jednostka wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** dla tego rzutu.",
+
+  "BM: 1 Set a Faction Indicator anywhere on the battlefield. While Enemy Units are Within 6\" of this Faction Indicator, they lose HIDDEN Status.":
+    "**ZB: 1** Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy. Dopóki **wrogie** jednostki są **w promieniu 6\"** od tego **Wskaźnika frakcji**, tracą status **UKRYTA**.",
+
+  "IMPACT Hit Rolls. Use after a Friendly Unit rolls a D6 for Charge Distance. Roll an additional D6 and use the higher result to calculate the total Charge Distance. BM: 1 BM: 1":
+    "**Rzutów na trafienie UDERZENIA**. Użyj, gdy **sojusznicza** jednostka rzuci **D6** na **Dystans szarży**. Rzuć dodatkową **D6** i użyj wyższego wyniku do obliczenia całkowitego **Dystansu szarży**. **ZB: 1 ZB: 1**",
+
+  "Use before a Friendly Unit makes an Evade Roll. Apply a +1 Modifier to that roll.":
+    "Użyj, zanim **sojusznicza** jednostka wykona **Rzut na unik**. Zastosuj **+1 Modyfikator** do tego rzutu.",
+
+  "The active, Unengaged Ground Unit gains the Burrowed Status.":
+    "Aktywna, **niezwiązana walką jednostka Naziemna** zyskuje status **Zagrzebana**.",
+
+  "During Army Building, select exactly one Creep Card and add it to their Army List, paying its listed cost (if any).":
+    "Podczas **budowy armii** wybierz dokładnie jedną **Kartę biomasy** i dodaj ją do swojej **Listy armii**, płacąc jej podany koszt (jeśli istnieje).",
+
+  "Set a Creep Tumor token on the battlefield Within 6\" ( Line of Sight is not required) of either a Friendly Entry Edge or an existing Friendly Creep Tumor token.":
+    "Umieść żeton **Tumora biomasy** na polu bitwy **w promieniu 6\"** (**Linia wzroku** nie jest wymagana) od **sojuszniczej Krawędzi wejścia** lub istniejącego żetonu **sojuszniczego Tumora biomasy**.",
+
+  "Select one Friendly, Unengaged Ground Zerg Unit on the battlefield. That Unit gains the Burrowed Status, even if it has already been Activated this Round.":
+    "Wybierz jedną **sojuszniczą, niezwiązaną walką naziemną jednostkę Zergów** na polu bitwy. Ta jednostka zyskuje status **Zagrzebana**, nawet jeśli została już **Aktywowana** w tej rundzie.",
+
+  "If an Enemy Unit ends a Move, Deploy, Run, Charge or Disengage action Within 1\" of a Friendly Creep Tumor token, remove that token from the battlefield.":
+    "Jeśli **wroga** jednostka zakończy akcję **Ruchu, Rozmieszczenia, Biegu, Szarży lub Rozłączenia** **w promieniu 1\"** od żetonu **sojuszniczego Tumora biomasy**, usuń ten żeton z pola bitwy.",
+
+  "BM: 1 The active Unit’s first Ranged Weapon used gains PRECISION (1).":
+    "**ZB: 1** Pierwsza użyta **Broń dystansowa** aktywnej jednostki zyskuje **PRECYZJĘ (1)**.",
+
+  "Creep Tumor tokens have STAY IN PLAY and DISPLACEMENT.":
+    "Żetony **Tumora biomasy** mają **POZOSTAJE W GRZE** oraz **PRZEMIESZCZENIE**.",
+
+  "If the active Friendly Zerg Unit declares a Charge action while ON CREEP, it gains +1 Modifier to IMPACT Hit Rolls. BM: 1 BM: 1":
+    "Jeśli aktywna **sojusznicza jednostka Zergów** zadeklaruje akcję **Szarży** będąc **NA BIOMASIE**, zyskuje **+1 Modyfikator do Rzutów na trafienie UDERZENIA**. **ZB: 1 ZB: 1**",
+
+  "If the active unit is ON CREEP, the unit gains BUFF Speed (1) and its first used Weapon gains PRECISION (1).":
+    "Jeśli aktywna jednostka jest **NA BIOMASIE**, zyskuje **WZMOCNIENIE Szybkości (1)**, a jej pierwsza użyta **Broń** zyskuje **PRECYZJĘ (1)**.",
+
+  "Set a Faction Indicator anywhere on the battlefield more than 10\" away from any Enemy model. At the End of the Round, the controlling player may Deploy one Ground Unit from Reserves in base-to-base contact with this":
+    "Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. Na **końcu rundy** gracz kontrolujący może **Rozmieścić** jedną jednostkę **Naziemną** z **Rezerw** w **kontakcie podstawkami** z tym",
+
+  "During Faction Indicator. Army Building, you must select exactly one Creep Card and add it to your Army List, paying its listed":
+    "Podczas **Wskaźnikiem frakcji**. **budowy armii** musisz wybrać dokładnie jedną **Kartę biomasy** i dodać ją do swojej **Listy armii**, płacąc jej podany",
+
+  "cost (if any). Set a Creep Tumor token on the battlefield Within 6\" ( Line of Sight is not required) of either a Friendly":
+    "koszt (jeśli istnieje). Umieść żeton **Tumora biomasy** na polu bitwy **w promieniu 6\"** (**Linia wzroku** nie jest wymagana) od **sojuszniczej**",
+
+  "Entry Edge or an existing Friendly Creep Tumor If there is no Friendly Omega Worm on token. the battlefield, set a Friendly Omega Worm Unit anywhere on GROUND LEVEL of the battlefield, more than 10\" away from any Enemy model. This Round, the Omega Worm is not eligible to use its Special Abilities (excluding Structure).":
+    "**Krawędzi wejścia** lub istniejącego żetonu **sojuszniczego Tumora biomasy** Jeśli na polu bitwy nie ma **sojuszniczego Robaka omega**, umieść jednostkę **sojuszniczego Robaka omega** w dowolnym miejscu na **POZIOMIE NAZIEMNYM** pola bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. W tej rundzie **Robak omega** nie może używać swoich **Zdolności specjalnych** (z wyjątkiem **Budowli**).",
+
+  "BM: 1 The active Ground Unit loses the Burrowed Status.":
+    "**ZB: 1** Aktywna **jednostka Naziemna** traci status **Zagrzebana**.",
+
+  "BM: 1 The active Unit’s Close Combat Weapons gain INSTANT.":
+    "**ZB: 1** **Bronie do walki wręcz** aktywnej jednostki zyskują **NATYCHMIASTOWY**.",
+
+  "Set a Creep Tumor token on the battlefield Within 6\" (Line of Sight is not required) of either a Friendly Entry Edge or an existing Friendly Creep Tumor token. BM: 2":
+    "Umieść żeton **Tumora biomasy** na polu bitwy **w promieniu 6\" (Linia wzroku** nie jest wymagana) od **sojuszniczej Krawędzi wejścia** lub istniejącego żetonu **sojuszniczego Tumora biomasy**. **ZB: 2**",
+
+  "The active Zergling Unit Deploys from any table edge that is not a Player’s Entry Edge. This action must end more than 10\" away from any Enemy model.":
+    "Aktywna **jednostka Zerglinga Rozmieszcza się** z dowolnej krawędzi stołu niebędącej **Krawędzią wejścia** gracza. Ta akcja musi zakończyć się dalej niż **10\"** od dowolnego **wrogiego** modelu.",
+
+  "If the active Friendly Zerg Unit is ON CREEP, increase its Speed characteristic by 1.":
+    "Jeśli aktywna **sojusznicza jednostka Zergów** jest **NA BIOMASIE**, zwiększ jej cechę **Szybkość o 1**.",
+
+  "Creep Tumor tokens have STAY IN PLAY":
+    "Żetony **Tumora biomasy** mają **POZOSTAJE W GRZE**",
+
+  "FERAL RAGE and DISPLACEMENT. The active Unit’s first Close Combat Weapon used gains PRECISION (2).":
+    "**DZIKA FURIA** oraz **PRZEMIESZCZENIE**. Pierwsza użyta **Broń do walki wręcz** aktywnej jednostki zyskuje **PRECYZJĘ (2)**.",
+
+  "BM: 1 The active Unit’s first Close Combat Weapon used gains PRECISION (2).":
+    "**ZB: 1** Pierwsza użyta **Broń do walki wręcz** aktywnej jednostki zyskuje **PRECYZJĘ (2)**.",
+
+  "When another Friendly Unit Within 8\" is declared as the target of a Ranged Attack and this Unit is a valid target, redirect the attack to this Unit. This Unit is eligible to make an Evade Roll against the redirected attack. This Special Ability remains active until the End of the current Activation.":
+    "Gdy inna **sojusznicza** jednostka **w promieniu 8\"** zostaje wskazana jako cel **Ataku dystansowego**, a ta jednostka jest prawidłowym celem, przekieruj atak na tę jednostkę. Ta jednostka może wykonać **Rzut na unik** przeciwko przekierowanemu atakowi. Ta **Zdolność specjalna** pozostaje aktywna do **końca bieżącej Aktywacji**.",
+
+  "Use before a Friendly Biological Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.":
+    "Użyj, zanim **sojusznicza jednostka Biologiczna** wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** dla tego rzutu.",
+
+  "Once per Game. Immediately claim the First Player Marker. No other player may claim the First Player Marker for the remainder of this Phase.":
+    "**Raz na grę.** Natychmiast przejmij **Znacznik pierwszego gracza**. Żaden inny gracz nie może przejąć **Znacznika pierwszego gracza** do końca tej fazy."
+}

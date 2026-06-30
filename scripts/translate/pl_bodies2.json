@@ -1,0 +1,141 @@
+{
+  "_meta": "PL ability-body translations, batch 2 (Terran unit cards + scenario/mission cards). Same conventions as pl_bodies.json. The three large mission-card entries translate source-order-interleaved parallel columns faithfully (the source itself reads as two duplicated columns spliced line-by-line); flagged best-effort.",
+
+  "All Mission Markers are Deactivated. All Mission Markers are Deactivated. START OF THE ROUND (1-4): Randomly determine one START OF THE ROUND (2-4): Randomly determine one Deactivated Mission Marker (1-4) and flip it to its Deactivated Mission Marker (1,2,5) and flip it to its Activated side. Activated side. START OF THE ROUND 5: Mission Marker 5 is automatically Activated. Score VPs equal to Enemy Supply destroyed this Round. Score VPs equal to FROM THE START OF THE SECOND ROUND: For each Enemy Supply destroyed this Round. activated Controlled Mission Marker, gain VPs equal to the Game Round number in which that Mission Marker FROM THE START OF THE FIRST ROUND: For each was Activated and remove it. activated Controlled Mission Marker, gain VPs equal to the Game Round number in which that Mission Marker was Activated and remove it. SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 8+ VPs. SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 12+ VPs. All Mission Markers are Activated. All Mission Markers are Activated. Score VPs equal to Enemy Supply destroyed this Round. Score VPs equal to Enemy Supply destroyed this Round. FROM THE START OF THE SECOND ROUND: FROM THE START OF THE SECOND ROUND: Gain 1 VP for each Controlled Mission Marker that is Gain 1 VP for each Controlled Mission Marker that is Neutral or associated with your colour. Neutral or associated with your colour. Gain 2 VPs for each Controlled Mission Marker associated Gain 2 VPs for each Controlled Mission Marker associated with the Opponent colour. with the Opponent colour. SPECIAL WINNING CONDITIONS: The game ends SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 10+ VPs. immediately if a Player leads by 8+ VPs.":
+    "Wszystkie **Znaczniki misji** są **Dezaktywowane**. Wszystkie **Znaczniki misji** są **Dezaktywowane**. **POCZĄTEK RUNDY (1-4):** Wylosuj jeden **POCZĄTEK RUNDY (2-4):** Wylosuj jeden **Dezaktywowany Znacznik misji (1-4)** i odwróć go na jego **Dezaktywowany Znacznik misji (1,2,5)** i odwróć go na jego **Aktywowaną** stronę. **Aktywowaną** stronę. **POCZĄTEK RUNDY 5: Znacznik misji 5** jest automatycznie **Aktywowany**. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. Zdobądź **PZ** równe **OD POCZĄTKU DRUGIEJ RUNDY:** Za każdy **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. aktywowany kontrolowany **Znacznik misji** zdobądź **PZ** równe numerowi rundy gry, w której ten **Znacznik misji OD POCZĄTKU PIERWSZEJ RUNDY:** Za każdy został **Aktywowany**, i usuń go. aktywowany kontrolowany **Znacznik misji** zdobądź **PZ** równe numerowi rundy gry, w której ten **Znacznik misji** został **Aktywowany**, i usuń go. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 8+ PZ**. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 12+ PZ**. Wszystkie **Znaczniki misji** są **Aktywowane**. Wszystkie **Znaczniki misji** są **Aktywowane**. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. **OD POCZĄTKU DRUGIEJ RUNDY: OD POCZĄTKU DRUGIEJ RUNDY:** Zdobądź **1 PZ** za każdy kontrolowany **Znacznik misji**, który jest Zdobądź **1 PZ** za każdy kontrolowany **Znacznik misji**, który jest **Neutralny** lub powiązany z twoim kolorem. **Neutralny** lub powiązany z twoim kolorem. Zdobądź **2 PZ** za każdy kontrolowany **Znacznik misji** powiązany Zdobądź **2 PZ** za każdy kontrolowany **Znacznik misji** powiązany z kolorem **Przeciwnika**. z kolorem **Przeciwnika**. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 10+ PZ**. natychmiast, jeśli **Gracz** prowadzi **o 8+ PZ**.",
+
+  "All Mission Markers are Activated. All Mission Markers are Activated. Score VPs equal to Enemy Supply destroyed this Round. Score VPs equal to Enemy Supply destroyed this Round. FROM THE START OF THE SECOND ROUND: FROM THE START OF THE SECOND ROUND: Gain 1 VP for each Controlled Mission Marker. Gain 1 VP for each Controlled Mission Marker. Gain an additional 2 VPs for a Marker if you gained Gain an additional 2 VPs for a Marker if you gained Control of it from the Opponent this Round. Control of it from the Opponent this Round. SPECIAL WINNING CONDITIONS: The game ends SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 10+ VPs. immediately if a Player leads by 8+ VPs. All Mission Markers are Activated. All Mission Markers are Activated. Score VPs equal to Enemy Supply destroyed this Round. Score VPs equal to Enemy Supply destroyed this Round. FROM THE START OF THE SECOND ROUND: FROM THE START OF THE SECOND ROUND: Gain 2 VPs for each Controlled Mission Marker associated Gain 2 VPs for each Controlled Mission Marker associated with the Opponent colour. with the Opponent colour. ASSAULT PHASE: If an Unengaged Unit is ASSAULT PHASE: If an Unengaged Unit is Within 3\" of a Controlled Neutral Mission Marker or Within 3\" of a Controlled Neutral Mission Marker or associated with the Opponent, this unit may perform the associated with the Opponent, this unit may perform the Gather Action instead of a standard action. Gather Action instead of a standard action. GATHER ACTION: Gain 1 VP. GATHER ACTION: Gain 1 VP. SPECIAL WINNING CONDITIONS: The game ends SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 10+ VPs. immediately if a Player leads by 8+ VPs.":
+    "Wszystkie **Znaczniki misji** są **Aktywowane**. Wszystkie **Znaczniki misji** są **Aktywowane**. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. **OD POCZĄTKU DRUGIEJ RUNDY: OD POCZĄTKU DRUGIEJ RUNDY:** Zdobądź **1 PZ** za każdy kontrolowany **Znacznik misji**. Zdobądź **1 PZ** za każdy kontrolowany **Znacznik misji**. Zdobądź dodatkowe **2 PZ** za Znacznik, jeśli w tej rundzie przejąłeś Zdobądź dodatkowe **2 PZ** za Znacznik, jeśli w tej rundzie przejąłeś nad nim kontrolę od **Przeciwnika**. nad nim kontrolę od **Przeciwnika**. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 10+ PZ**. natychmiast, jeśli **Gracz** prowadzi **o 8+ PZ**. Wszystkie **Znaczniki misji** są **Aktywowane**. Wszystkie **Znaczniki misji** są **Aktywowane**. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. **OD POCZĄTKU DRUGIEJ RUNDY: OD POCZĄTKU DRUGIEJ RUNDY:** Zdobądź **2 PZ** za każdy kontrolowany **Znacznik misji** powiązany Zdobądź **2 PZ** za każdy kontrolowany **Znacznik misji** powiązany z kolorem **Przeciwnika**. z kolorem **Przeciwnika**. **FAZA SZTURMU:** Jeśli **niezwiązana walką** jednostka jest **FAZA SZTURMU:** Jeśli **niezwiązana walką** jednostka jest **w promieniu 3\"** od kontrolowanego **Neutralnego Znacznika misji** lub **w promieniu 3\"** od kontrolowanego **Neutralnego Znacznika misji** lub powiązanego z **Przeciwnikiem**, może wykonać powiązanego z **Przeciwnikiem**, może wykonać **Akcję zbierania** zamiast standardowej akcji. **Akcję zbierania** zamiast standardowej akcji. **AKCJA ZBIERANIA:** Zdobądź **1 PZ**. **AKCJA ZBIERANIA:** Zdobądź **1 PZ**. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 10+ PZ**. natychmiast, jeśli **Gracz** prowadzi **o 8+ PZ**.",
+
+  "All Mission Markers are Activated. All Mission Markers are Activated. Split the Battlefield in four quarters as shown on the Split the Battlefield in four quarters as shown on the Deployment Card. Deployment Card. Score VPs equal to Enemy Supply destroyed this Round. Score VPs equal to Enemy Supply destroyed this Round. FROM THE START OF THE FIRST ROUND: FROM THE START OF THE FIRST ROUND: Calculate Total Current Supply in each battlefield quarter. Calculate Total Current Supply in each battlefield quarter. Gain 1 VP for each quarter where your Total Current Gain 1 VP for each quarter where your Total Current Supply is higher than the Opponent's. Supply is higher than the Opponent's. Only Units Wholly Within a quarter contribute their Only Units Wholly Within a quarter contribute their Supply to this check. Supply to this check. If a Unit controls a Mission Marker, that Unit is worth 1 If a Unit controls a Mission Marker, that Unit is worth 1 extra Supply for controlling quarters. extra Supply for controlling quarters. Gain 2 VP for Controlling Mission Marker 5. Gain 2 VP for Controlling Mission Marker 5. SPECIAL WINNING CONDITIONS: The game ends SPECIAL WINNING CONDITIONS: The game ends immediately if a Player leads by 10+ VPs. immediately if a Player leads by 8+ VPs. 24\" 6\" 6\" 6\" 12\" 12\" 12\" 6\" 18\" 12\" 18\" 18\" 6\" 6\" 18\" 12\" 18\" 12\" 12\" 18\" 6\" 12\" 6\" 6\" 6\" 24\"":
+    "Wszystkie **Znaczniki misji** są **Aktywowane**. Wszystkie **Znaczniki misji** są **Aktywowane**. Podziel pole bitwy na cztery ćwiartki, jak pokazano na Podziel pole bitwy na cztery ćwiartki, jak pokazano na **Karcie rozmieszczenia**. **Karcie rozmieszczenia**. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. Zdobądź **PZ** równe **Zaopatrzeniu wroga** zniszczonemu w tej rundzie. **OD POCZĄTKU PIERWSZEJ RUNDY: OD POCZĄTKU PIERWSZEJ RUNDY:** Oblicz **Całkowite bieżące zaopatrzenie** w każdej ćwiartce pola bitwy. Oblicz **Całkowite bieżące zaopatrzenie** w każdej ćwiartce pola bitwy. Zdobądź **1 PZ** za każdą ćwiartkę, w której twoje **Całkowite bieżące** Zdobądź **1 PZ** za każdą ćwiartkę, w której twoje **Całkowite bieżące zaopatrzenie** jest wyższe niż **Przeciwnika**. **zaopatrzenie** jest wyższe niż **Przeciwnika**. Tylko jednostki **całkowicie w obrębie** ćwiartki wnoszą swoje Tylko jednostki **całkowicie w obrębie** ćwiartki wnoszą swoje **Zaopatrzenie** do tego sprawdzenia. **Zaopatrzenie** do tego sprawdzenia. Jeśli jednostka kontroluje **Znacznik misji**, jest warta **1** Jeśli jednostka kontroluje **Znacznik misji**, jest warta **1** dodatkowego **Zaopatrzenia** przy kontrolowaniu ćwiartek. dodatkowego **Zaopatrzenia** przy kontrolowaniu ćwiartek. Zdobądź **2 PZ** za kontrolowanie **Znacznika misji 5**. Zdobądź **2 PZ** za kontrolowanie **Znacznika misji 5**. **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się **SPECJALNE WARUNKI ZWYCIĘSTWA:** Gra kończy się natychmiast, jeśli **Gracz** prowadzi **o 10+ PZ**. natychmiast, jeśli **Gracz** prowadzi **o 8+ PZ**. **24\" 6\" 6\" 6\" 12\" 12\" 12\" 6\" 18\" 12\" 18\" 18\" 6\" 6\" 18\" 12\" 18\" 12\" 12\" 18\" 6\" 12\" 6\" 6\" 6\" 24\"**",
+
+  "This Unit suffers NON-LETHAL DAMAGE (2). This Unit gains BUFF Speed (3). Additionally, its C-14 Rifle and all Close Combat Weapons gain PRECISION (3).":
+    "Ta jednostka otrzymuje **OBRAŻENIA NIEŚMIERTELNE (2)**. Ta jednostka zyskuje **WZMOCNIENIE Szybkości (3)**. Dodatkowo jej **Karabin C-14** i wszystkie **Bronie do walki wręcz** zyskują **PRECYZJĘ (3)**.",
+
+  "This Unit is always eligible to make an Evade Roll against any Close Combat Attack targeting it and any Damage from an Enemy Special Ability.":
+    "Ta jednostka zawsze może wykonać **Rzut na unik** przeciwko każdemu **Atakowi wręcz** obierającemu ją za cel oraz każdym **Obrażeniom** pochodzącym z **wrogiej Zdolności specjalnej**.",
+
+  "When this Unit makes a Ranged Attack with a C-14 Rifle and the target is Within 8\", that weapon gains ANTI-EVADE (1).":
+    "Gdy ta jednostka wykonuje **Atak dystansowy Karabinem C-14**, a cel jest **w promieniu 8\"**, ta broń zyskuje **ANTY-UNIK (1)**.",
+
+  "When this Unit makes a Ranged Attack with a C-14 Rifle and the target is Within 8\", that weapon’s is replaced by D6.":
+    "Gdy ta jednostka wykonuje **Atak dystansowy Karabinem C-14**, a cel jest **w promieniu 8\"**, kość tej broni zostaje zastąpiona **przez D6**.",
+
+  "This Unit suffers NON-LETHAL DAMAGE (2). This Unit gains BUFF Speed (3). Additionally, its Quad K12 and all Close Combat Weapons gain PRECISION (2).":
+    "Ta jednostka otrzymuje **OBRAŻENIA NIEŚMIERTELNE (2)**. Ta jednostka zyskuje **WZMOCNIENIE Szybkości (3)**. Dodatkowo jej **Quad K12** i wszystkie **Bronie do walki wręcz** zyskują **PRECYZJĘ (2)**.",
+
+  "While this Unit is Within 3\" of a Mission characteristic is increased by 1.":
+    "Dopóki ta jednostka jest **w promieniu 3\"** od **Misji**, jej cecha jest zwiększona **o 1**.",
+
+  "Marker, its Armour":
+    "**Znacznika**, jej **Pancerz**",
+
+  "This Unit’s Quad K12 weapon gains LONG RANGE (16\").":
+    "Broń **Quad K12** tej jednostki zyskuje **DALEKI ZASIĘG (16\")**.",
+
+  "When an Enemy declares a Charge against a Friendly Unit Within 8\", that Enemy gains DEBUFF Speed (2).":
+    "Gdy **wróg** deklaruje **Szarżę** przeciwko **sojuszniczej** jednostce **w promieniu 8\"**, ten **wróg** zyskuje **OSŁABIENIE Szybkości (2)**.",
+
+  "Use when another Friendly Biological Unit suffers Damage Within 4\". Reduce the Total Damage before allocation by 1 for each model in this Unit that is Within 4\" of the damaged Unit.":
+    "Użyj, gdy inna **sojusznicza jednostka Biologiczna w promieniu 4\"** otrzymuje **Obrażenia**. Zmniejsz **Całkowite obrażenia** przed ich przydzieleniem **o 1** za każdy model w tej jednostce, który jest **w promieniu 4\"** od ranionej jednostki.",
+
+  "a Life Support or Medpack ability, treat it as having 1 additional model Within Range for calculating that ability's effects.":
+    "zdolność **Podtrzymywanie życia** lub **Medpak**, traktuj ją jak posiadającą **1** dodatkowy model **w zasięgu** przy obliczaniu efektów tej zdolności.",
+
+  "This Unit’s Supply Value counts as 0 when calculating the Supply Pool.":
+    "**Wartość zaopatrzenia** tej jednostki liczy się **jako 0** przy obliczaniu **Puli zaopatrzenia**.",
+
+  "Increase the Optical Flare special ability's Range to 16\".":
+    "Zwiększ **Zasięg** zdolności specjalnej **Flara optyczna do 16\"**.",
+
+  "Select another Friendly Biological Unit Within 4\". Resolve the HEAL (X) effect for the targeted Unit, where X is the number of models in this Unit that are Within 4\" of the target Unit.":
+    "Wybierz inną **sojuszniczą jednostkę Biologiczną w promieniu 4\"**. Rozpatrz efekt **LECZENIE (X)** dla obranej jednostki, gdzie **X** to liczba modeli w tej jednostce, które są **w promieniu 4\"** od jednostki będącej celem.",
+
+  "Select one Enemy Unit Within 12\". Until the End of the Round, apply DEBUFF Range (4) to that Unit’s Ranged Weapons. That Unit cannot benefit from LONG RANGE.":
+    "Wybierz jedną **wrogą** jednostkę **w promieniu 12\"**. Do **końca rundy** zastosuj **OSŁABIENIE Zasięgu (4)** do **Broni dystansowych** tej jednostki. Ta jednostka nie może korzystać z **DALEKIEGO ZASIĘGU.**",
+
+  "The Supply Value of all Friendly Units Within 8\" of this Unit cannot be reduced below 1 for Contesting Mission Markers and completing objectives.":
+    "**Wartość zaopatrzenia** wszystkich **sojuszniczych** jednostek **w promieniu 8\"** od tej jednostki nie może zostać obniżona poniżej **1** przy kontestowaniu **Znaczników misji** i wykonywaniu celów.",
+
+  "REPEATABLE. Select another Friendly Biological Unit Within 8\", spend CP and apply one of the following effects:: That Unit’s first used weapon gains the CRITICAL HIT (2).: That Unit ignores the Disengage penalty for the remainder of the Round.: Remove the Activation Marker from that Unit.":
+    "**POWTARZALNE.** Wybierz inną **sojuszniczą jednostkę Biologiczną w promieniu 8\"**, wydaj PD i zastosuj jeden z następujących efektów:: Pierwsza użyta broń tej jednostki zyskuje **TRAFIENIE KRYTYCZNE (2)**.: Ta jednostka ignoruje karę za **Rozłączenie** do końca rundy.: Usuń **Znacznik aktywacji** z tej jednostki.",
+
+  "When another Friendly Unit Within 4\" is targeted by a Ranged Attack without the INSTANT keyword, remove up to 2 dice from the Attack Pool. Then remove this Unit from the battlefield.":
+    "Gdy inna **sojusznicza** jednostka **w promieniu 4\"** zostaje obrana za cel **Ataku dystansowego** bez słowa kluczowego **NATYCHMIASTOWY**, usuń do **2** kości z **Puli ataku**. Następnie usuń tę jednostkę z pola bitwy.",
+
+  "This Unit cannot be Activated in any Phase and cannot perform actions. Additionally, its Current Supply Value is treated as 0, and it can never Control or Contest Mission Markers, ignoring the standard Zero Supply Exception. This Unit cannot be a":
+    "Ta jednostka nie może zostać **Aktywowana** w żadnej fazie i nie może wykonywać akcji. Dodatkowo jej **Bieżąca wartość zaopatrzenia** jest traktowana **jako 0** i nigdy nie może kontrolować ani kontestować **Znaczników misji**, ignorując standardowy **Wyjątek zerowego zaopatrzenia**. Ta jednostka nie może być",
+
+  "target of an ability, unless stated otherwise. This model has DISPLACEMENT.":
+    "celem zdolności, chyba że wskazano inaczej. Ten model ma **PRZEMIESZCZENIE**.",
+
+  "When this Unit is nominated to deploy from Reserves, it may resolve its Stimpack ability with the CP cost reduced by 1 (to a minimum of 0).":
+    "Gdy ta jednostka zostaje wyznaczona do rozmieszczenia z **Rezerw**, może rozpatrzyć swoją zdolność **Stimpack** z kosztem **PD** obniżonym **o 1** (do minimum 0).",
+
+  "When this Unit is nominated to deploy from Reserves, it may resolve the PLACE (10) effect from another Friendly Unit. No model may be set Within 8\" of any Enemy model. This Unit's Activation ends.":
+    "Gdy ta jednostka zostaje wyznaczona do rozmieszczenia z **Rezerw**, może rozpatrzyć efekt **UMIESZCZENIE (10)** z innej **sojuszniczej** jednostki. Żaden model nie może zostać ustawiony **w promieniu 8\"** od dowolnego **wrogiego** modelu. **Aktywacja** tej jednostki się kończy.",
+
+  "Select one Enemy Unit Within 12\". Whenever a Friendly Goliath Unit targets that enemy with an Autocannon, that weapon gains Surge Type: Light, Armoured, and S Dice: D3+1.":
+    "Wybierz jedną **wrogą** jednostkę **w promieniu 12\"**. Ilekroć **sojusznicza jednostka Goliata** obiera tego wroga za cel **Działkiem automatycznym**, ta broń zyskuje **Typ nawały: Lekki, Opancerzony** oraz **K nawały: D3+1**.",
+
+  "This Unit’s Autocannon and Underbelly Machine Gun weapons gain PRECISION (1).":
+    "Bronie **Działko automatyczne** i **Podbrzuszny karabin maszynowy** tej jednostki zyskują **PRECYZJĘ (1)**.",
+
+  "While Engaged, this Unit may target and be targeted by Unengaged Enemy Units. In both cases, the defending Unit gains an Evade Roll against those attacks.":
+    "Będąc **Związaną walką**, ta jednostka może obierać za cel i być obierana za cel przez **niezwiązane walką wrogie** jednostki. W obu przypadkach jednostka broniąca się zyskuje **Rzut na unik** przeciwko tym atakom.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (4) 3+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (4) 3+**.",
+
+  "CP: 1 Once per Round, when a Friendly Support Unit activates a Special Ability that costs CP, resolve that ability with its CP cost reduced by 1 (to a minimum of 0). Do not Exhaust this card. CP: 1":
+    "**PD: 1 Raz na rundę**, gdy **sojusznicza jednostka Wsparcia** aktywuje **Zdolność specjalną** kosztującą PD, rozpatrz tę zdolność z kosztem **PD** obniżonym **o 1** (do minimum 0). Nie **Wyczerpuj** tej karty. **PD: 1**",
+
+  "CP: 1 The active Biological Unit performs a 2\" Move action. This does not count towards its action limit. CP: 1":
+    "**PD: 1** Aktywna **jednostka Biologiczna** wykonuje akcję **Ruchu o 2\"**. Nie wlicza się to do jej limitu akcji. **PD: 1**",
+
+  "The active Unit ignores the Disengage penalty for the remainder of the Round.":
+    "Aktywna jednostka ignoruje karę za **Rozłączenie** do końca **rundy**.",
+
+  "The active Biological Unit’s first Ranged Weapon used gains CRITICAL HIT (1).":
+    "Pierwsza użyta **Broń dystansowa** aktywnej **jednostki Biologicznej** zyskuje **TRAFIENIE KRYTYCZNE (1)**.",
+
+  "The active, Unengaged Ground Unit is returned to The active Unit’s Reserves instead of performing an action. Supply Value is improved by 1 for Controlling and Contesting Mission Markers and completing objectives.":
+    "Aktywna, **niezwiązana walką jednostka Naziemna** zostaje zwrócona do **Rezerw** zamiast wykonywania akcji. **Wartość zaopatrzenia** aktywnej jednostki jest zwiększona **o 1** przy kontrolowaniu i kontestowaniu **Znaczników misji** oraz wykonywaniu celów.",
+
+  "Set a Faction Indicator anywhere on the battlefield more than 10\" away from any Enemy model. At the End of the Round, the controlling player may Deploy one Ground Unit from Reserves in base-to-base contact with this Faction Indicator. CP: 1 CP: 1":
+    "Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. Na **końcu rundy** gracz kontrolujący może **Rozmieścić** jedną jednostkę **Naziemną** z **Rezerw** w **kontakcie podstawkami** z tym **Wskaźnikiem frakcji**. **PD: 1 PD: 1**",
+
+  "Set a Friendly Point Defence Drone Unit anywhere on the battlefield, more than 1\" away from any Enemy model. Remove this Unit at the End of the Round.":
+    "Umieść jednostkę **sojuszniczego Drona obrony punktowej** w dowolnym miejscu na polu bitwy, dalej niż **1\"** od dowolnego **wrogiego** modelu. Usuń tę jednostkę na **końcu rundy**.",
+
+  "Select one table edge that is not a player’s Entry Edge. Until the End of the Round, Enemy Units cannot Deploy from that edge.":
+    "Wybierz jedną **krawędź stołu** niebędącą **Krawędzią wejścia** gracza. Do **końca rundy wrogie** jednostki nie mogą **Rozmieszczać się** z tej krawędzi.",
+
+  "Once Per Game. The active Unit battlefield. While Enemy Units are Within 6\" of resolves the PLACE (12) effect. Models set by this this Faction Indicator, they lose HIDDEN Status. effect cannot be set up Within the Engagement Range of any Enemy Unit. This resolves instead of performing a standard action.":
+    "**Raz na grę.** Aktywna jednostka polu bitwy. Dopóki **wrogie** jednostki są **w promieniu 6\"** od rozpatruje efekt **UMIESZCZENIE (12)**. Modele umieszczone tym tego **Wskaźnika frakcji**, tracą status **UKRYTA**. efektem nie mogą zostać ustawione **w** **Zasięgu walki** żadnej **wrogiej** jednostki. To rozpatruje się zamiast wykonywania standardowej akcji.",
+
+  "CP: 2 The active Biological Unit performs a 2\" Move action. This does not count towards its action limit.":
+    "**PD: 2** Aktywna **jednostka Biologiczna** wykonuje akcję **Ruchu o 2\"**. Nie wlicza się to do jej limitu akcji.",
+
+  "CP: 1 The active Mechanical Unit resolves the HEAL (2) effect.":
+    "**PD: 1** Aktywna **jednostka Mechaniczna** rozpatruje efekt **LECZENIE (2)**.",
+
+  "The active Biological Unit’s first Ranged Weapon used gains ANTI-EVADE (1). CP: 2 CP: 1":
+    "Pierwsza użyta **Broń dystansowa** aktywnej **jednostki Biologicznej** zyskuje **ANTY-UNIK (1)**. **PD: 2 PD: 1**",
+
+  "The active Biological Unit performs a 2\" Move action. This does not count towards its action limit.":
+    "Aktywna **jednostka Biologiczna** wykonuje akcję **Ruchu o 2\"**. Nie wlicza się to do jej limitu akcji.",
+
+  "Use before a Friendly Mechanical Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.":
+    "Użyj, zanim **sojusznicza jednostka Mechaniczna** wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** dla tego rzutu.",
+
+  "The active Biological Unit Deploys from any table edge that is not a player's Entry Edge. No model may be placed Within 10\" of any Enemy model. This ability cannot be used if another Friendly Biological Unit has already been Deployed this Round.":
+    "Aktywna **jednostka Biologiczna Rozmieszcza się** z dowolnej krawędzi stołu niebędącej **Krawędzią wejścia** gracza. Żaden model nie może zostać umieszczony **w promieniu 10\"** od dowolnego **wrogiego** modelu. Tej zdolności nie można użyć, jeśli inna **sojusznicza jednostka Biologiczna** została już **Rozmieszczona** w tej rundzie.",
+
+  "The active Mechanical Unit’s first Ranged Weapon used gain CRITICAL HIT (1).":
+    "Pierwsza użyta **Broń dystansowa** aktywnej **jednostki Mechanicznej** zyskuje **TRAFIENIE KRYTYCZNE (1)**.",
+
+  "This Unit’s Horizontal Coherency is 4\". Armoured":
+    "**Spójność pozioma** tej jednostki wynosi **4\"**. Opancerzony"
+}

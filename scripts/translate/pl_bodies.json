@@ -1,0 +1,147 @@
+{
+  "_meta": "Authored PL translations for ability-body prose, keyed by exact source_text. **...** marks the fragments rendered bold; translate_segments.py strips the markers and computes target bold ranges. Glossary-constrained (glossary/pl.csv); terms kept consistent across all bodies. A few entries (mission/scenario cards on rotated grid sheets) are best-effort over source-order-interleaved text and are flagged in notes — the layout engine still matches them by id.",
+
+  "All Weapons of Friendly Units targeting an Enemy Unit Within 4\" of this Unit’s Shade token gain PRECISION (1).":
+    "Wszystkie **bronie** **sojuszniczych** jednostek atakujące **wrogą** jednostkę **w promieniu 4\"** od żetonu **Cienia** tej jednostki zyskują **PRECYZJĘ (1)**.",
+
+  "This Unit's Glaive Cannon gains BUFF RoA (1).":
+    "**Działo glewii** tej jednostki zyskuje **WZMOCNIENIE SA (1)**.",
+
+  "This Unit's Glaive Cannon Ranged weapon gains ANTI-EVADE (2).":
+    "Broń dystansowa **Działo glewii** tej jednostki zyskuje **ANTY-UNIK (2)**.",
+
+  "Set a Shade token Wholly Within 12\" of any model in this Unit. At the End of the Round, the controlling player may set all models of this Unit in Coherency, treating the Shade token as the Leading Model. The Shade token has DISPLACEMENT.":
+    "Umieść żeton **Cienia** **całkowicie w promieniu 12\"** od dowolnego modelu tej jednostki. Na **końcu rundy** gracz kontrolujący może ustawić wszystkie modele tej jednostki w **spójności**, traktując żeton **Cienia** jako **model prowadzący**. Żeton **Cienia** ma **PRZEMIESZCZENIE**.",
+
+  "Treat this Unit’s Supply characteristic as increased by 1 for Controlling and Contesting Mission Markers, completing objectives, and resolving Disengage checks.":
+    "Traktuj cechę **Zaopatrzenie** tej jednostki jako zwiększoną **o 1** przy kontrolowaniu i kontestowaniu **Znaczników misji**, wykonywaniu celów oraz rozpatrywaniu testów **Rozłączenia**.",
+
+  "When Artanis is nominated to deploy from Reserves, it may resolve the PLACE (0) effect from another Friendly Unit. That Friendly Unit is removed from the battlefield and returned to Reserves. Artanis' Activation ends.":
+    "Gdy **Artanis** zostaje wyznaczony do rozmieszczenia z **Rezerw**, może rozpatrzyć efekt **UMIESZCZENIE (0)** z innej **sojuszniczej** jednostki. Ta **sojusznicza** jednostka zostaje usunięta z pola bitwy i wraca do **Rezerw**. **Aktywacja** **Artanisa** się kończy.",
+
+  "After this Unit resolves a successful Charge action, it may declare a second Charge action against a different Enemy Unit, ignoring the restriction on Charging while Engaged. The Devastating Charge ability does not trigger a second time.":
+    "Po rozpatrzeniu przez tę jednostkę udanej akcji **Szarży** może ona zadeklarować drugą akcję **Szarży** przeciwko innej **wrogiej** jednostce, ignorując ograniczenie **Szarżowania** w stanie **Związania walką**. Zdolność **Niszczycielska szarża** nie aktywuje się po raz drugi.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (6) 4+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (6) 4+**.",
+
+  "This Unit gains TOUGH (2) on the first Armour Roll each Round.":
+    "Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (2)** przy pierwszym **Rzucie na pancerz** w każdej rundzie.",
+
+  "This Unit performs a 2\" Move action. This does not count towards its action limit.":
+    "Ta jednostka wykonuje akcję **Ruchu o 2\"**. Nie wlicza się to do jej limitu akcji.",
+
+  "When determining Charge Distance for this Unit, roll 2D6 instead of D6 and use the higher result to add to the Unit’s Speed characteristic.":
+    "Przy ustalaniu **Dystansu szarży** tej jednostki rzuć **2D6** zamiast **D6** i dodaj wyższy wynik do cechy **Szybkość** jednostki.",
+
+  "Immediately after this Unit completes a successful Charge, resolve the IMPACT (3) 4+ effect.":
+    "Natychmiast po ukończeniu przez tę jednostkę udanej **Szarży** rozpatrz efekt **UDERZENIE (3) 4+**.",
+
+  "When this Unit makes a Close Combat Attack, and the target is Size 3 or larger, the weapon’s Damage characteristic is treated as 2.":
+    "Gdy ta jednostka wykonuje **Atak wręcz**, a cel ma **Rozmiar 3** lub większy, cecha **Obrażenia** broni jest traktowana **jako 2**.",
+
+  "This Unit is eligible to make an Evade roll against all attacks targeting it.":
+    "Ta jednostka może wykonać **Rzut na unik** przeciwko wszystkim atakom ją obierającym za cel.",
+
+  "Once per Round, when a Friendly Unit Within 4\" of this Pylon uses a Special Ability that costs Psionic Energy, that ability’s PE cost is reduced by 1.":
+    "**Raz na rundę**, gdy **sojusznicza** jednostka **w promieniu 4\"** od tego **Pylonu** używa **Zdolności specjalnej** kosztującej **Energię psioniczną**, koszt **EP** tej zdolności zostaje obniżony **o 1**.",
+
+  "This Unit cannot be Activated in any Phase and cannot perform actions. Additionally, its Current Supply Value is treated as 0, and it can never Control or Contest Mission Markers, ignoring the standard Zero Supply Exception. This Unit cannot be a target of an ability, unless stated otherwise.":
+    "Ta jednostka nie może zostać **Aktywowana** w żadnej fazie i nie może wykonywać akcji. Dodatkowo jej **Bieżąca wartość zaopatrzenia** jest traktowana **jako 0** i nigdy nie może kontrolować ani kontestować **Znaczników misji**, ignorując standardowy **Wyjątek zerowego zaopatrzenia**. Ta jednostka nie może być celem zdolności, chyba że wskazano inaczej.",
+
+  "Once per Round, the controlling player may deploy a Ground Unit from Reserves using this Pylon base as the Entry Edge. This Unit's Activation ends.":
+    "**Raz na rundę** gracz kontrolujący może rozmieścić jednostkę **Naziemną** z **Rezerw**, używając podstawki tego **Pylonu** jako **Krawędzi wejścia**. **Aktywacja** tej jednostki się kończy.",
+
+  "Use when a Friendly Unit Within 4\" receives a DEBUFF. Remove all DEBUFFS from it.":
+    "Użyj, gdy **sojusznicza** jednostka **w promieniu 4\"** otrzymuje **OSŁABIENIE**. Usuń z niej wszystkie **OSŁABIENIA**.",
+
+  "Set a Force Field token Within 8\" in an unoccupied space. Units of Size 2 or lower cannot move across Force Fields. Models of Size 3 or more can move over it, and it's then removed.":
+    "Umieść żeton **Pola siłowego** **w promieniu 8\"** w niezajętym miejscu. Jednostki o **Rozmiarze 2** lub mniejszym nie mogą przemieszczać się przez **Pola siłowe**. Modele o **Rozmiarze 3** lub większym mogą się przez nie przemieścić, po czym zostaje ono usunięte.",
+
+  "All Ranged Attacks targeting a Friendly Unit Within 4\" ( Line of Sight is not required) are made with 1 fewer die in the Attack Pool.":
+    "Wszystkie **Ataki dystansowe** obierające za cel **sojuszniczą** jednostkę **w promieniu 4\"** (**Linia wzroku** nie jest wymagana) są wykonywane z **1** kością mniej w **Puli ataku**.",
+
+  "When an Enemy Unit declares a Ranged Attack against a Friendly Unit Within 4\", the targeted Friendly Unit is eligible to make an Evade Roll against that attack.":
+    "Gdy **wroga** jednostka deklaruje **Atak dystansowy** przeciwko **sojuszniczej** jednostce **w promieniu 4\"**, obrana za cel **sojusznicza** jednostka może wykonać **Rzut na unik** przeciwko temu atakowi.",
+
+  "This Unit’s Horizontal Coherency is 4\".":
+    "**Spójność pozioma** tej jednostki wynosi **4\"**.",
+
+  "This Unit gains HIDDEN Status until it performs another action.":
+    "Ta jednostka zyskuje status **UKRYTA**, dopóki nie wykona kolejnej akcji.",
+
+  "Resolve the PLACE (6) effect. Models set by this effect cannot be set up Within the Engagement Range of any Enemy Unit.":
+    "Rozpatrz efekt **UMIESZCZENIE (6)**. Modele umieszczone tym efektem nie mogą zostać ustawione **w** **Zasięgu walki** żadnej **wrogiej** jednostki.",
+
+  "When this Unit attacks an Enemy Unit that has already been Activated during this Phase, its Particle Disruptors gain INSTANT for that attack.":
+    "Gdy ta jednostka atakuje **wrogą** jednostkę, która została już **Aktywowana** w tej fazie, jej **Zakłócacze cząstek** zyskują **NATYCHMIASTOWY** dla tego ataku.",
+
+  "When this Unit resolves IMPACT, each eligible model generates 1 additional IMPACT die.":
+    "Gdy ta jednostka rozpatruje **UDERZENIE**, każdy uprawniony model generuje **1** dodatkową kość **UDERZENIA**.",
+
+  "When this Unit is not Activated and receives Damage, the controlling player may count this Unit as Activated in this Phase (flip its Activation Marker) to reduce the Total Damage by 2.":
+    "Gdy ta jednostka nie jest **Aktywowana** i otrzymuje **Obrażenia**, gracz kontrolujący może uznać ją za **Aktywowaną** w tej fazie (odwracając jej **Znacznik aktywacji**), aby zmniejszyć **Całkowite obrażenia o 2**.",
+
+  "When this Unit makes a Close Combat Attack, if the target is Engaged with at least 1 other Friendly Unit, this Unit's Close Combat Weapon gains PRECISION (2).":
+    "Gdy ta jednostka wykonuje **Atak wręcz**, jeśli cel jest **Związany walką** z co najmniej **1** inną **sojuszniczą jednostką**, **Broń do walki wręcz** tej jednostki zyskuje **PRECYZJĘ (2)**.",
+
+  "PE: 1 If there is no Friendly Pylon on the battlefield, set a Friendly Pylon Unit anywhere on the GROUND LEVEL of the battlefield more than 10\"":
+    "**EP: 1** Jeśli na polu bitwy nie ma **sojuszniczego Pylonu**, umieść jednostkę **sojuszniczego Pylonu** w dowolnym miejscu na **POZIOMIE NAZIEMNYM** pola bitwy, dalej niż **10\"**",
+
+  "PE: 1 The active Unit gains BUFF Speed (2).":
+    "**EP: 1** Aktywna jednostka zyskuje **WZMOCNIENIE Szybkości (2)**.",
+
+  "away from any Enemy model. This Round, the Pylon is not eligible to use its Special Abilities (excluding The active Unit’s first Close Combat Weapon used gains PRECISION (2). Structure).":
+    "od dowolnego **wrogiego** modelu. W tej rundzie **Pylon** nie może używać swoich **Zdolności specjalnych** (z wyjątkiem Pierwsza użyta **Broń do walki wręcz** aktywnej jednostki zyskuje **PRECYZJĘ (2)**. **Budowli**).",
+
+  "At the end of the active Unit’s Activation, select one other Friendly Unit eligible to Activate in the current Phase. Immediately Activate that Unit. PE: 1 PE: 1":
+    "Na koniec **Aktywacji** aktywnej jednostki wybierz jedną inną **sojuszniczą** jednostkę uprawnioną do **Aktywowania** w bieżącej fazie. Natychmiast **Aktywuj** tę jednostkę. **EP: 1 EP: 1**",
+
+  "The active Unit resolves the PLACE (3) effect.":
+    "Aktywna jednostka rozpatruje efekt **UMIESZCZENIE (3)**.",
+
+  "The active Unit’s first Close Combat Weapon used gains PRECISION (2).":
+    "Pierwsza użyta **Broń do walki wręcz** aktywnej jednostki zyskuje **PRECYZJĘ (2)**.",
+
+  "Set a Faction Indicator anywhere on the battlefield more than 10\" away from any Enemy model. At the End of the Round, you may Deploy one Ground unit from Reserves in base-to-base Contact with this Faction Indicator.":
+    "Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy, dalej niż **10\"** od dowolnego **wrogiego** modelu. Na **końcu rundy** możesz **Rozmieścić** jedną jednostkę **Naziemną** z **Rezerw** w **kontakcie podstawkami** z tym **Wskaźnikiem frakcji**.",
+
+  "PE: 1 The active GROUND Unit Deploys from any table edge that is not a player’s Entry Edge. This deployment must end more than 10\" away from any Enemy model. The controlling player cannot use this ability if another Friendly Ground Unit has already Deployed this Round.":
+    "**EP: 1** Aktywna jednostka **NAZIEMNA** **Rozmieszcza się** z dowolnej krawędzi stołu niebędącej **Krawędzią wejścia** gracza. To rozmieszczenie musi zakończyć się dalej niż **10\"** od dowolnego **wrogiego** modelu. Gracz kontrolujący nie może użyć tej zdolności, jeśli inna **sojusznicza jednostka Naziemna** już się **Rozmieściła** w tej rundzie.",
+
+  "PE: 1 Use when an Enemy Unit enters the battlefield from Reserves via a location other than its own Entry Edge. That Unit immediately suffers HITS 3 (1).":
+    "**EP: 1** Użyj, gdy **wroga** jednostka wchodzi na pole bitwy z **Rezerw** przez miejsce inne niż jej własna **Krawędź wejścia**. Ta jednostka natychmiast otrzymuje **TRAFIENIA 3 (1)**.",
+
+  "The active, Unengaged Ground Unit is":
+    "Aktywna, **niezwiązana walką jednostka Naziemna** zostaje",
+
+  "returned to Reserves instead of performing an The active Unit’s first Close Combat action. Weapon used gains PRECISION (2). PE: 1 PE: 1":
+    "zwrócona do **Rezerw** zamiast wykonywania akcji. Pierwsza użyta **Broń do walki wręcz** aktywnej jednostki zyskuje **PRECYZJĘ (2)**. **EP: 1 EP: 1**",
+
+  "When a Friendly Unit receives Damage, reduce the Total Damage by 2 (to a minimum of 1).":
+    "Gdy **sojusznicza** jednostka otrzymuje **Obrażenia**, zmniejsz **Całkowite obrażenia o 2** (do minimum 1).",
+
+  "Use after a Friendly Unit resolves a PLACE effect. That Unit immediately resolves the HEAL (2) effect.":
+    "Użyj, gdy **sojusznicza** jednostka rozpatrzy efekt **UMIESZCZENIE**. Ta jednostka natychmiast rozpatruje efekt **LECZENIE (2)**.",
+
+  "Once per Game. Set a Faction Indicator The active Ground Unit’s first anywhere on the battlefield. All Friendly Protoss Ranged Weapon used gains BUFF Range (4). Units Within 6\" of this Faction Indicator are removed from the battlefield and returned to Reserves.":
+    "**Raz na grę.** Umieść **Wskaźnik frakcji** Pierwsza użyta **Broń dystansowa sojuszniczej jednostki Naziemnej** w dowolnym miejscu na polu bitwy. Wszystkie **sojusznicze** zyskuje **WZMOCNIENIE Zasięgu (4)**. jednostki **Protosów w promieniu 6\"** od tego **Wskaźnika frakcji** zostają usunięte z pola bitwy i zwrócone do **Rezerw.**",
+
+  "PE: 1 Use before a Friendly Ground Unit makes an Armour Roll. That Unit gains TOUGH (1) for this roll.":
+    "**EP: 1** Użyj, zanim **sojusznicza jednostka Naziemna** wykona **Rzut na pancerz**. Ta jednostka zyskuje **WYTRZYMAŁOŚĆ (1)** dla tego rzutu.",
+
+  "PE: 1 The active Unit’s first Weapon used gains INSTANT.":
+    "**EP: 1** Pierwsza użyta **Broń** aktywnej jednostki zyskuje **NATYCHMIASTOWY**.",
+
+  "returned to Reserves instead of performing an action. The active Ground Unit’s first Ranged Weapon used gains CRITICAL HIT (1). PE: 1 PE: 1":
+    "zwrócona do **Rezerw** zamiast wykonywania akcji. Pierwsza użyta **Broń dystansowa** aktywnej **jednostki Naziemnej** zyskuje **TRAFIENIE KRYTYCZNE (1)**. **EP: 1 EP: 1**",
+
+  "Use before a Friendly Ground Unit makes an Armour Roll. That Unit gains DODGE (2) for this roll.":
+    "Użyj, zanim **sojusznicza jednostka Naziemna** wykona **Rzut na pancerz**. Ta jednostka zyskuje **UNIK (2)** dla tego rzutu.",
+
+  "Set a Faction Indicator anywhere on the battlefield. While Enemy Units are Within 6\" of this Faction Indicator, they lose HIDDEN Status.":
+    "Umieść **Wskaźnik frakcji** w dowolnym miejscu na polu bitwy. Dopóki **wrogie** jednostki znajdują się **w promieniu 6\"** od tego **Wskaźnika frakcji**, tracą status **UKRYTA**.",
+
+  "Use after a Friendly Unit rolls a D6 for Charge Distance. Add 1 to the Charge Distance for this Unit.":
+    "Użyj, gdy **sojusznicza** jednostka rzuci **D6** na **Dystans szarży**. Dodaj **1** do **Dystansu szarży** tej jednostki."
+}
