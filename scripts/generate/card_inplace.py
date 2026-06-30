@@ -28,7 +28,7 @@ ARCHIVE = fitz.Archive(str(FDIR))
 BODY_CSS = """
 @font-face { font-family: NCr; src: url("NotoSansCond-Medium.ttf"); }
 @font-face { font-family: NCb; src: url("NotoSansCond-ExtraBold.ttf"); }
-* { font-family: NCr; color: #000000; margin: 0; padding: 0; line-height: 1.02; }
+* { font-family: NCr; color: #000000; margin: 0; padding: 0; line-height: 1.2; }
 b { font-family: NCb; }
 """
 
@@ -59,9 +59,9 @@ PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
 # line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
 # width below — matching the original. rot 180 (front) keeps indent 0 (rotated-flow indent is wrong-side).
 ABILITIES = [
-    {"block": [189, 476, 349, 497], "body": [192, 477, 347, 499], "indent": 104, "rot": 0,
+    {"block": [189, 476, 349, 497], "body": [192, 480, 347, 500], "indent": 104, "rot": 0,
      "html": "<b>Działo glewii</b> tej jednostki zyskuje <b>WZMOCNIENIE RoA (1)</b>."},
-    {"block": [351, 476, 489, 497], "body": [354, 477, 487, 499], "indent": 60, "rot": 0,
+    {"block": [351, 476, 489, 497], "body": [354, 480, 487, 500], "indent": 60, "rot": 0,
      "html": "Broń dystansowa <b>Działa glewii</b> tej jednostki zyskuje <b>ANTY-UNIK (2)</b>."},
     {"block": [85, 313, 421, 348], "body": [88, 314, 320, 347], "indent": 0, "rot": 180,
      "html": "Umieść żeton <b>Cienia</b> całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton <b>Cienia</b> jako model prowadzący. Żeton ma <b>PRZEMIESZCZENIE</b>."},
