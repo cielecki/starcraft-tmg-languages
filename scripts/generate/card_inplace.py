@@ -203,14 +203,36 @@ def draw(page, s, text, key=None, fit=None, avail=None):
                      color=rgb(s["c"]), rotate=rot)
 
 
-def draw_pill(page, s, text):
+def draw_pill(page, s, text, dx=0):
     x0, y0, x1, y1 = s["bb"]; w = x1-x0; fs = s["sz"]
     while fs > 3 and FZ["ext"].text_length(text, fs) > w * 0.98:
         fs -= 0.2
     tw = FZ["ext"].text_length(text, fs)
     x = x0 + (w-tw)/2 if s["dir"] >= 0 else x1 - (w-tw)/2
-    page.insert_text((x, s["org"][1]), text, fontsize=fs, fontname="ext", fontfile=FPATH["ext"],
+    page.insert_text((x+dx, s["org"][1]), text, fontsize=fs, fontname="ext", fontfile=FPATH["ext"],
                      color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
+
+
+def fill_at(draws, target, colored):
+    """A filled rect overlapping `target`. colored=True -> the saturated pill rect (smallest);
+    colored=False -> the light-grey panel rect (largest). Returns (rect, rgb) or None."""
+    hits = []
+    for d in draws:
+        f = d.get("fill")
+        if not f:
+            continue
+        r = fitz.Rect(d["rect"]); sat = max(f) - min(f)
+        if not r.intersects(fitz.Rect(target)):
+            continue
+        if colored and (sat < 0.15 or r.width > 34):
+            continue
+        if not colored and not (sat < 0.06 and 0.6 < f[0] < 0.96):
+            continue
+        hits.append((r.get_area(), r, tuple(f)))
+    if not hits:
+        return None
+    r = (min if colored else max)(hits, key=lambda h: h[0])
+    return r[1], r[2]
 
 
 def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"):
@@ -232,6 +254,24 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
     # a span inside an ability body is never a standalone target (even if it matches MAP, e.g. "All"
     # -> "Wsz."): the body reflow handles it. Otherwise it gets drawn twice.
     targets = [s for s in spans if s["t"] in MAP and id(s) not in body_ids]
+
+    draws = page.get_drawings()
+    # Header-row reflow: a longer PL header would otherwise shrink to fit before the FIXED pill.
+    # Instead push the pill (+ its coloured rect) along so the header keeps full size. `shift` is
+    # signed by reading direction; header+pill spans are drawn in the reflow pass, not the generic one.
+    shift, hdr_pill_ids = {}, set()
+    for i, (a, g, bs) in enumerate(abil):
+        blk = a["block"]
+        hs = [s for s in targets if s["t"] in HEADERS and in_rect(s["bb"], blk)]
+        ps = [s for s in targets if s["t"] in PILLS and in_rect(s["bb"], blk)]
+        shift[i] = 0.0
+        if hs and ps and hs[0]["dir"] >= 0:                    # reflow only upright (back) headers
+            h = hs[0]; hk = pick(h["font"])
+            hw = FZ[hk].text_length(MAP[h["t"]], h["sz"]); gap = FZ[hk].text_length(" ", h["sz"])
+            shift[i] = max(0.0, h["org"][0]+hw+gap - min(p["bb"][0] for p in ps))
+        if shift[i] > 0.3:                                     # only take over drawing when we move things
+            for s in hs + ps:
+                hdr_pill_ids.add(id(s))
 
     # Redact ONLY what we replace: translated labels + ability prose. NOT whole blocks — that would
     # catch phase-bar icons (e.g. the upgrade arrow) and redraw them in the wrong font.
@@ -260,24 +300,31 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           graphics=fitz.PDF_REDACT_LINE_ART_NONE,
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
-    for a, g, bs in abil:                                      # bodies (rich text -> bold keywords)
+    for i, (a, g, bs) in enumerate(abil):                      # bodies (rich text -> bold keywords)
         if not g:
             continue
         fs = g["fs"]; lh = max(1.0, g["spacing"]/fs)
         y0 = g["base1"] - FZ["med"].ascender*fs - (lh-1)*fs/2  # land line 1 on the original baseline
-        lrect = (g["left"]-0.5, y0, g["right"]+1, g["last"]+fs+2)
+        bottom = g["last"]+fs+2
+        if a["rot"] == 0:
+            bottom = min(bottom, a["block"][3]-1)              # keep the body inside the panel
+        lrect = (g["left"]-0.5, y0, g["right"]+1, bottom)
         if a["rot"] == 0:
             rect = fitz.Rect(lrect)
         else:                                                  # transform the logical rect to page
             cx, cy = (a["block"][0]+a["block"][2])/2, (a["block"][1]+a["block"][3])/2
             rect = fitz.Rect(2*cx-lrect[2], 2*cy-lrect[3], 2*cx-lrect[0], 2*cy-lrect[1])
-        indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)  # gap after the pills
+        indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)
+        if shift.get(i, 0.0) > 0.3:                            # reflowed: start clear of the moved pill
+            indent += shift[i] + 2.5
         html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
                 f'line-height:{lh:.3f}">{auto_bold(a["body"])}</div>')
         page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
         draw(page, s, s["t"])
     for s in targets:
+        if id(s) in hdr_pill_ids:                              # ability header/pills -> reflow pass
+            continue
         pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
         if s["t"] in PILLS:
             draw_pill(page, s, pl); continue
@@ -294,6 +341,23 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
             if c:
                 av = min(av, (c.x1 - s["org"][0] - 2) if s["dir"] >= 0 else (s["org"][0] - c.x0 - 2))
             draw(page, s, pl, avail=av)
+
+    for i, (a, g, bs) in enumerate(abil):                      # reflowed back headers: full size + moved pills
+        dx = shift.get(i, 0.0)
+        if dx <= 0.3:                                          # others use the generic path
+            continue
+        blk = a["block"]
+        pan = fill_at(draws, blk, colored=False)
+        pcol = pan[1] if pan else (0.855, 0.855, 0.851)
+        for p in [s for s in spans if s["t"] in PILLS and in_rect(s["bb"], blk)]:
+            cr = fill_at(draws, p["bb"], colored=True)
+            if abs(dx) > 0.3 and cr:                            # move the coloured pill rect with the text
+                r, col = cr
+                page.draw_rect(r, fill=pcol, color=pcol, width=0)
+                page.draw_rect(fitz.Rect(r.x0+dx, r.y0, r.x1+dx, r.y1), fill=col, color=col, width=0)
+            draw_pill(page, p, OVERRIDES.get((round(p["bb"][0]), round(p["bb"][1]))) or MAP[p["t"]], dx=dx)
+        for h in [s for s in spans if s["t"] in HEADERS and in_rect(s["bb"], blk)]:
+            draw(page, h, MAP[h["t"]], avail=FZ[pick(h["font"])].text_length(MAP[h["t"]], h["sz"])+2)
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
