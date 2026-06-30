@@ -1,26 +1,44 @@
 #!/usr/bin/env python3
-"""Programmatic overlap linter for localized card PDFs — the acceptance gate.
+"""Programmatic text-overlap linter for localized card PDFs — the acceptance gate.
 
-Text-on-text overlap is unreadable and must NEVER ship. It's detectable without vision: two drawn
-text spans whose bounding boxes intersect significantly are a defect. This reads the OUTPUT PDF's
-own text geometry (every span the engine drew — labels, pills, reflowed bodies) and reports any
-pair that collides. Bboxes are axis-aligned in page space, so rotation (0/90/180/270) is handled
-for free. Exit code is non-zero if any overlap is found, so it can gate CI / the build.
+Text-on-text overlap is unreadable and must not be INTRODUCED by localization. It's detectable
+without vision from the output PDF's own text geometry. Two refinements over naive span-bbox:
 
-Usage: python3 scripts/lint_overlaps.py <pdf> [<pdf> ...]  [--min-ratio 0.30] [--json]
+  1. Glyph-band, not full bbox. A span's bbox spans ascender→descender (em height), so two stacked
+     lines "overlap" in the blank leading even when the ink doesn't. We inset each box to its core
+     ink band along the CROSS axis of the reading direction (so it works for 0/90/180/270 cards),
+     which removes line-spacing false positives and leaves only real ink collisions.
+  2. Parity with the source, not absolute zero. The original EN cards have intentional overlaps
+     (emboss duplicates, stat number/label stacking). The goal is to match the ORIGINAL's overlap
+     rate, so we report EN vs PL vs INTRODUCED (PL overlaps with no counterpart in EN). Introduced
+     is the defect count to drive to 0; exit code is non-zero iff introduced > 0.
+
+Usage: python3 scripts/lint_overlaps.py <pl_pdf> [...]  [--source-dir sources/pdf] [--raw] [--json]
 """
-import sys, json, argparse, fitz
+import sys, os, json, argparse, fitz
 from itertools import combinations
 
+TOP, BOT = 0.16, 0.18   # ink-band inset (fraction of cross-axis), drops leading/descender space
 
-def spans(page):
+
+def units(page):
+    """Per-span ink-band rects, inset on the cross axis of the text's reading direction."""
     out = []
     for b in page.get_text("dict")["blocks"]:
         for l in b.get("lines", []):
+            dx, dy = l.get("dir", (1, 0))
             for s in l.get("spans", []):
                 t = s["text"].strip()
-                if t:
-                    out.append((fitz.Rect(s["bbox"]), t))
+                if not t:
+                    continue
+                x0, y0, x1, y1 = s["bbox"]; w, h = x1-x0, y1-y0
+                if w <= 0 or h <= 0:
+                    continue
+                if abs(dx) >= abs(dy):                       # horizontal text -> inset vertically
+                    r = fitz.Rect(x0, y0+TOP*h, x1, y1-BOT*h)
+                else:                                        # vertical text -> inset horizontally
+                    r = fitz.Rect(x0+TOP*w, y0, x1-BOT*w, y1)
+                out.append((r, t))
     return out
 
 
@@ -28,15 +46,13 @@ def overlap_ratio(a, b):
     inter = a & b
     if inter.is_empty or inter.width <= 0 or inter.height <= 0:
         return 0.0, 0.0
-    ia = inter.width * inter.height
-    smaller = min(a.width*a.height, b.width*b.height) or 1e-9
-    return ia / smaller, ia
+    ia = inter.width*inter.height
+    return ia / (min(a.width*a.height, b.width*b.height) or 1e-9), ia
 
 
 def lint_page(page, min_ratio, min_area):
-    sp = spans(page)
-    hits = []
-    for (ra, ta), (rb, tb) in combinations(sp, 2):
+    u = units(page); hits = []
+    for (ra, ta), (rb, tb) in combinations(u, 2):
         ratio, ia = overlap_ratio(ra, rb)
         if ratio >= min_ratio and ia >= min_area:
             hits.append({"a": ta, "b": tb, "ratio": round(ratio, 2), "union": ra | rb,
@@ -45,9 +61,6 @@ def lint_page(page, min_ratio, min_area):
 
 
 def en_source_for(pl_pdf, source_dir):
-    """Map build/<lang>/<Name>_PL.pdf -> sources/pdf/<Name>_EN.pdf so we can subtract the original's
-    intentional overlaps (emboss duplicates, stat number/label stacking) and flag only NEW ones."""
-    import os
     base = os.path.basename(pl_pdf)
     for suf in ("_PL.pdf", "_pl.pdf"):
         if base.endswith(suf):
@@ -55,71 +68,61 @@ def en_source_for(pl_pdf, source_dir):
     return None
 
 
-def iou(a, b):
-    inter = a & b
-    if inter.is_empty:
-        return 0.0
-    ia = inter.width*inter.height
-    ua = a.width*a.height + b.width*b.height - ia
-    return ia/ua if ua else 0.0
-
-
-def introduced(pl_hits, en_hits):
-    """A PL overlap is INTRODUCED (our bug) if no EN overlap sits at the same place (union IoU>0.4)."""
-    out = []
-    for h in pl_hits:
-        if not any(iou(h["union"], e["union"]) > 0.4 for e in en_hits):
-            out.append(h)
-    return out
+def matches(u, en_hits):
+    """An overlap is intentional (already in EN) if an EN overlap sits at the same place."""
+    return any((u & e["union"]).width > 0 and overlap_ratio(u, e["union"])[0] > 0.4 for e in en_hits)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("pdfs", nargs="+")
-    ap.add_argument("--min-ratio", type=float, default=0.30)   # intersection / smaller-span area
-    ap.add_argument("--min-area", type=float, default=2.0)     # pt^2, ignore sub-pixel touches
-    ap.add_argument("--source-dir", default="sources/pdf")     # to subtract the EN's own overlaps
-    ap.add_argument("--raw", action="store_true")              # don't subtract source (show all)
+    ap.add_argument("--min-ratio", type=float, default=0.18)
+    ap.add_argument("--min-area", type=float, default=1.5)     # pt^2
+    ap.add_argument("--source-dir", default="sources/pdf")
+    ap.add_argument("--raw", action="store_true")              # don't subtract source
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
 
-    report, total = {}, 0
+    report, grand = {}, {"en": 0, "pl": 0, "introduced": 0}
     for pdf in a.pdfs:
         doc = fitz.open(pdf)
-        en = None
-        if not a.raw:
-            src = en_source_for(pdf, a.source_dir)
-            try:
-                en = fitz.open(src) if src else None
-            except Exception:
-                en = None
-        pages = {}
+        en = None if a.raw else (lambda s: fitz.open(s) if s and os.path.exists(s) else None)(
+            en_source_for(pdf, a.source_dir))
+        pages, tot = {}, {"en": 0, "pl": 0, "introduced": 0}
         for i, page in enumerate(doc):
-            hits = lint_page(page, a.min_ratio, a.min_area)
-            if en is not None and i < en.page_count:
-                hits = introduced(hits, lint_page(en[i], a.min_ratio, a.min_area))
-            for h in hits:
+            pl_hits = lint_page(page, a.min_ratio, a.min_area)
+            tot["pl"] += len(pl_hits)
+            en_hits = lint_page(en[i], a.min_ratio, a.min_area) if (en and i < en.page_count) else []
+            tot["en"] += len(en_hits)
+            intro = [h for h in pl_hits if not matches(h["union"], en_hits)] if en else pl_hits
+            for h in intro:
                 h.pop("union", None)
-            if hits:
-                pages[i] = hits
-                total += len(hits)
-        report[pdf] = pages
+            if intro:
+                pages[i] = intro; tot["introduced"] += len(intro)
+        report[pdf] = {"pages": pages, "totals": tot}
+        for k in grand:
+            grand[k] += tot[k]
 
     if a.json:
-        print(json.dumps(report, ensure_ascii=False, indent=2))
+        for v in report.values():
+            for p in v["pages"].values():
+                for h in p:
+                    h.pop("union", None)
+        print(json.dumps({"report": report, "grand": grand}, ensure_ascii=False, indent=2,
+                         default=str))
     else:
-        for pdf, pages in report.items():
-            name = pdf.split("/")[-1]
-            n = sum(len(h) for h in pages.values())
-            print(f"\n{name}: {n} overlap(s) on {len(pages)} page(s)")
-            for pg in sorted(pages):
-                print(f"  p{pg}: {len(pages[pg])} overlap(s)")
-                for h in pages[pg][:6]:
-                    print(f"      [{h['ratio']:.2f}] {h['a']!r:32.32} ⨯ {h['b']!r:32.32}")
-                if len(pages[pg]) > 6:
-                    print(f"      … +{len(pages[pg])-6} more")
-        print(f"\nTOTAL: {total} text-on-text overlaps")
-    sys.exit(1 if total else 0)
+        for pdf, v in report.items():
+            t = v["totals"]
+            print(f"\n{os.path.basename(pdf)}: INTRODUCED={t['introduced']}  (EN={t['en']} PL={t['pl']})")
+            for pg in sorted(v["pages"]):
+                hits = v["pages"][pg]
+                print(f"  p{pg}: {len(hits)}")
+                for h in hits[:5]:
+                    print(f"      [{h['ratio']:.2f}] {h['a']!r:30.30} ⨯ {h['b']!r:30.30}")
+                if len(hits) > 5:
+                    print(f"      … +{len(hits)-5} more")
+        print(f"\nGRAND: INTRODUCED={grand['introduced']}  (EN baseline={grand['en']}, PL total={grand['pl']})")
+    sys.exit(1 if grand["introduced"] else 0)
 
 
 if __name__ == "__main__":
