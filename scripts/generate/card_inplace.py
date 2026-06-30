@@ -116,11 +116,6 @@ def is_icon_span(t):
     return hi >= max(1, len(glyphs)) and hi / len(glyphs) > 0.5
 
 
-def in_rect(bb, r):
-    cx, cy = (bb[0]+bb[2])/2, (bb[1]+bb[3])/2
-    return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
-
-
 def avail_width(s, spans):
     """Free space in the reading direction up to the next span on the same line (so a longer PL
     label grows into empty bar space instead of shrinking or centring onto an icon)."""
@@ -277,7 +272,7 @@ def _assign_bodies(spans, page=None):
                 break
             members[id(h)].append(s); consumed.add(id(s))
             prev = max(prev, scy)
-    return members, None
+    return members
 
 
 def detect_abilities(page, spans):
@@ -291,7 +286,7 @@ def detect_abilities(page, spans):
     ability cards (Adept), side-by-side panels, AND dense multi-ability tactical cards alike. Blocks
     come back in reading order (front card first, then top-to-bottom, then left-to-right) so
     block_index is stable for the JSONL body id."""
-    members, _ = _assign_bodies(spans, page)
+    members = _assign_bodies(spans, page)
     out = []
     for h in spans:
         if not is_header_span(h):
