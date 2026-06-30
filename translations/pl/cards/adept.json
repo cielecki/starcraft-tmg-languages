@@ -1,0 +1,56 @@
+{
+  "id": "adept",
+  "source": "firestore:army_units/adept",
+  "faction": {"en": "Protoss", "pl": "PROTOSI"},
+  "name": {"en": "Adept", "pl": "ADEPT"},
+  "unitType": {"en": "Core", "pl": "Podstawowa"},
+  "tags": {"en": "Biological, Light, Ground", "pl": "Biologiczny, Lekki, Naziemny"},
+  "combatRange": "3",
+  "stats": [
+    {"label_en": "HP", "label_pl": "PŻ", "value": "3"},
+    {"label_en": "Shield", "label_pl": "Osłona", "value": "2"},
+    {"label_en": "Armor", "label_pl": "Pancerz", "value": "5+"},
+    {"label_en": "Evade", "label_pl": "Unik", "value": "5+"},
+    {"label_en": "Speed", "label_pl": "Szybkość", "value": "5/8"},
+    {"label_en": "Size", "label_pl": "Rozmiar", "value": "2"},
+    {"label_en": "Combat Range", "label_pl": "Zasięg walki", "value": "3"}
+  ],
+  "squadProfile": {
+    "header_pl": ["Poziom", "Zaopatrzenie", "Modele"],
+    "rows": [["1", "0", "1 – 2"], ["2", "1", "3 – 4"], ["3", "0", "–"]]
+  },
+  "upgrades": [
+    {
+      "name": {"en": "Psionic Presence", "pl": "Psioniczna obecność"},
+      "meta_pl": "Pasywna · Dowolna faza",
+      "desc": {
+        "en": "All Weapons of Friendly Units targeting an Enemy Unit Within 4\" of this Unit’s Shade token gain PRECISION (1).",
+        "pl": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę znajdującą się w odległości do 4\" od żetonu Cienia tej jednostki zyskują PRECYZJĘ (1)."
+      }
+    },
+    {
+      "name": {"en": "Psionic Transfer", "pl": "Psioniczny transfer"},
+      "meta_pl": "Aktywna (1 Energia psioniczna) · Faza ruchu",
+      "desc": {
+        "en": "Set a Shade token Wholly Within 12\" of any model in this Unit. At the End of the Round, the controlling player may set all models of this Unit in Coherency, treating the Shade token as the Leading Model. The Shade token has DISPLACEMENT.",
+        "pl": "Umieść żeton Cienia całkowicie w odległości do 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele tej jednostki w spójności, traktując żeton Cienia jako model prowadzący. Żeton Cienia ma PRZEMIESZCZENIE."
+      }
+    },
+    {
+      "name": {"en": "Glaive Cannon", "pl": "Działo glewii"},
+      "meta_pl": "Faza szturmu",
+      "desc": {
+        "en": "RANGE: 8 | TARGET: All | RoA: 2 | HIT: 3+ | DMG: 1 — SURGE: Light (D3+1) — ANTI-EVADE (1)",
+        "pl": "ZASIĘG: 8 | CEL: Wszystkie | RoA: 2 | TRAFIENIE: 3+ | OBR.: 1 — NAWAŁA: Lekki (D3+1) — ANTY-UNIK (1)"
+      }
+    },
+    {
+      "name": {"en": "Resonating Glaives", "pl": "Rezonujące glewie"},
+      "meta_pl": "Aktywna (1 Energia psioniczna) · Faza szturmu · koszt 20",
+      "desc": {
+        "en": "This Unit's Glaive Cannon gains BUFF RoA (1).",
+        "pl": "Działo glewii tej jednostki zyskuje WZMOCNIENIE RoA (1)."
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "_meta": {
+    "lang": "pl",
+    "note": "Seed glossary for the walking skeleton. source=sc2-extracted/sc1-extracted means the PL term was verified in the extracted official game strings (corpus/raw); sc2-convention means an established SC2 PL term not yet machine-verified. confidence high|medium. Canonical PL term per EN; inflected forms allowed in running text.",
+    "schema": "id, en, pl, category, source, confidence, notes"
+  },
+  "terms": [
+    {"id": "faction-protoss", "en": "Protoss", "pl": "Protosi", "category": "faction", "source": "sc2-extracted", "confidence": "high", "notes": "decl. protosów (verified in SC2 plPL tooltips)"},
+    {"id": "faction-terran", "en": "Terran", "pl": "Terranie", "category": "faction", "source": "sc2-extracted", "confidence": "high", "notes": "decl. terran"},
+    {"id": "faction-zerg", "en": "Zerg", "pl": "Zergowie", "category": "faction", "source": "sc2-extracted", "confidence": "high", "notes": "decl. zergów; brand 'Zerg' often kept"},
+
+    {"id": "unit-adept", "en": "Adept", "pl": "Adept", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-marine", "en": "Marine", "pl": "Marine", "category": "unit", "source": "sc2-extracted", "confidence": "high", "notes": "name kept untranslated in SC2 PL"},
+    {"id": "unit-marauder", "en": "Marauder", "pl": "Maruder", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-medic", "en": "Medic", "pl": "Sanitariuszka", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-zergling", "en": "Zergling", "pl": "Zergling", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-roach", "en": "Roach", "pl": "Karakan", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-queen", "en": "Queen", "pl": "Królowa", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-sentry", "en": "Sentry", "pl": "Wartownik", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-stalker", "en": "Stalker", "pl": "Tropiciel", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "unit-zealot", "en": "Zealot", "pl": "Zelota", "category": "unit", "source": "sc2-extracted", "confidence": "high"},
+
+    {"id": "stat-hp", "en": "HP", "pl": "PŻ", "category": "stat", "source": "sc2-convention", "confidence": "medium", "notes": "Punkty Życia"},
+    {"id": "stat-health", "en": "Health", "pl": "Zdrowie", "category": "stat", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "stat-shield", "en": "Shield", "pl": "Osłona", "category": "stat", "source": "sc2-extracted", "confidence": "medium", "notes": "Plasma Shields -> Osłony plazmowe"},
+    {"id": "stat-armor", "en": "Armor", "pl": "Pancerz", "category": "stat", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "stat-evade", "en": "Evade", "pl": "Unik", "category": "stat", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "stat-speed", "en": "Speed", "pl": "Szybkość", "category": "stat", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "stat-size", "en": "Size", "pl": "Rozmiar", "category": "stat", "source": "tmg", "confidence": "medium"},
+    {"id": "stat-range", "en": "Range", "pl": "Zasięg", "category": "stat", "source": "sc2-convention", "confidence": "high"},
+    {"id": "stat-damage", "en": "Damage", "pl": "Obrażenia", "category": "stat", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "stat-supply", "en": "Supply", "pl": "Zaopatrzenie", "category": "stat", "source": "sc2-convention", "confidence": "medium"},
+
+    {"id": "kw-weapon", "en": "Weapon", "pl": "Broń", "category": "keyword", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "kw-light", "en": "Light", "pl": "Lekki", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-biological", "en": "Biological", "pl": "Biologiczny", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-ground", "en": "Ground", "pl": "Naziemny", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-psionic", "en": "Psionic", "pl": "Psioniczny", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-psionic-energy", "en": "Psionic Energy", "pl": "Energia psioniczna", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-shade", "en": "Shade", "pl": "Cień", "category": "keyword", "source": "tmg", "confidence": "medium", "notes": "Adept's Shade token"},
+
+    {"id": "resource-minerals", "en": "Minerals", "pl": "Minerały", "category": "resource", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "resource-vespene", "en": "Vespene Gas", "pl": "Wespan", "category": "resource", "source": "sc2-extracted", "confidence": "high"},
+
+    {"id": "phase-movement", "en": "Movement Phase", "pl": "Faza ruchu", "category": "phase", "source": "tmg", "confidence": "medium"},
+    {"id": "phase-assault", "en": "Assault Phase", "pl": "Faza szturmu", "category": "phase", "source": "tmg", "confidence": "medium"},
+    {"id": "phase-any", "en": "Any Phase", "pl": "Dowolna faza", "category": "phase", "source": "tmg", "confidence": "medium"},
+
+    {"id": "card-tactical", "en": "Tactical Card", "pl": "Karta taktyczna", "category": "card", "source": "tmg", "confidence": "medium"},
+    {"id": "card-faction", "en": "Faction Card", "pl": "Karta frakcji", "category": "card", "source": "tmg", "confidence": "medium"},
+    {"id": "card-special", "en": "Special Card", "pl": "Karta specjalna", "category": "card", "source": "tmg", "confidence": "medium"},
+    {"id": "kw-upgrade", "en": "Upgrade", "pl": "Ulepszenie", "category": "keyword", "source": "sc2-extracted", "confidence": "high"},
+    {"id": "kw-mission", "en": "Mission", "pl": "Misja", "category": "keyword", "source": "sc2-convention", "confidence": "medium"},
+    {"id": "kw-deployment", "en": "Deployment", "pl": "Rozmieszczenie", "category": "keyword", "source": "tmg", "confidence": "medium"},
+    {"id": "kw-unit", "en": "Unit", "pl": "Jednostka", "category": "keyword", "source": "sc2-convention", "confidence": "high"},
+    {"id": "kw-core", "en": "Core", "pl": "Podstawowa", "category": "keyword", "source": "tmg", "confidence": "medium", "notes": "Core unit type"},
+    {"id": "kw-precision", "en": "Precision", "pl": "Precyzja", "category": "keyword", "source": "tmg", "confidence": "medium"}
+  ]
+}

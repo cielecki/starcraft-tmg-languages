@@ -1,0 +1,61 @@
+{
+  "doc": "StarCraft-TMG_EN.pdf",
+  "page": 6,
+  "page_size_pt": [612, 792],
+  "regions": [
+    {
+      "id": "toc",
+      "bbox": [448, 10, 578, 24],
+      "bg": [0.106, 0.137, 0.235],
+      "color": [0.62, 0.66, 0.74],
+      "size": 7, "align": 2,
+      "en": "BACK TO TABLE OF CONTENTS",
+      "pl": "POWRÓT DO SPISU TREŚCI"
+    },
+    {
+      "id": "title",
+      "bbox": [42, 64, 235, 108],
+      "bg": [0.106, 0.137, 0.235],
+      "color": [0.96, 0.78, 0.16],
+      "size": 15, "align": 0, "bold": true,
+      "en": "PART 1: LEARN TO PLAY",
+      "pl": "CZĘŚĆ 1:\nNAUKA GRY"
+    },
+    {
+      "id": "left-col",
+      "bbox": [42, 111, 240, 250],
+      "bg": [0.106, 0.137, 0.235],
+      "color": [0.88, 0.90, 0.94],
+      "size": 8.5, "align": 3,
+      "en": "WORKED EXAMPLE: STARTING ROUNDS. ... Below are the first two rounds of the game between the TERRANS, played by Katherine, and the ZERG, played by James.",
+      "pl": "PRZYKŁAD ROZGRYWKI: PIERWSZE RUNDY\n\nBitwy w grze StarCraft: Tabletop Miniatures Game rozgrywają się na polu bitwy podzielonym na kolejne fazy tury. Poniżej przedstawiamy pierwsze dwie rundy partii rozgrywanej pomiędzy TERRANAMI, którymi dowodzi Katherine, a ZERGAMI, którymi dowodzi James."
+    },
+    {
+      "id": "right-col",
+      "bbox": [250, 64, 448, 288],
+      "bg": [0.106, 0.137, 0.235],
+      "color": [0.88, 0.90, 0.94],
+      "size": 8.5, "align": 3,
+      "en": "They both agree to choose a Mission and Deployment Card... After that, they prepare the battlefield... Once the battlefield is set up...",
+      "pl": "Oboje zgadzają się wspólnie wybrać Kartę Misji oraz Kartę Rozmieszczenia, aby stworzyć klasyczne starcie. Następnie razem przygotowują pole bitwy, rozmieszczając teren w sposób zapewniający obu stronom osłonę oraz cele specjalne.\n\nGdy pole bitwy jest już gotowe, a kości przygotowane, obaj gracze mogą rozpocząć rozgrywkę w pierwszej rundzie."
+    },
+    {
+      "id": "terran-box",
+      "bbox": [64, 322, 266, 518],
+      "bg": [0.97, 0.97, 0.98],
+      "color": [0.12, 0.14, 0.20],
+      "size": 8, "align": 0,
+      "en": "TERRAN / Units: 6 Marines... 2 Marauders, 3 Medics. Tactical Card: Barracks. Faction Card: Terran Armed Forces.",
+      "pl": "TERRANIE\n\nJednostki:\n• 6 Marines – z dwoma ulepszeniami: 1× AGG-12 zastępujące jeden karabin C-14 oraz 1× wyrzutnia rakiet.\n• 2 Maruderzy,\n• 3 Sanitariuszki.\n\nKarta taktyczna:\n• Koszary.\n\nKarta frakcji:\n• Siły Zbrojne Terran."
+    },
+    {
+      "id": "zerg-box",
+      "bbox": [273, 322, 476, 540],
+      "bg": [0.97, 0.97, 0.98],
+      "color": [0.12, 0.14, 0.20],
+      "size": 8, "align": 0,
+      "en": "ZERG / Units: 12 Zerglings... 3 Roaches... 1 Queen. Tactical Cards: Roach Warren. Faction Card: Zerg Swarm. Special Card: Accelerating Creep.",
+      "pl": "ZERGOWIE\n\nJednostki:\n• 12 Zerglingów – z ulepszeniem Tnące Szpony, zastępującym ich zwykłe Szpony.\n• 3 Karakany – z ulepszeniem Zasadzka z Nory,\n• 1 Królowa.\n\nKarty taktyczne:\n• Legowisko Karakanów.\n\nKarta frakcji:\n• Rój Zergów.\n\nKarta specjalna:\n• Przyśpieszona Maź."
+    }
+  ]
+}
