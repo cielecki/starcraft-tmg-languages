@@ -54,6 +54,9 @@ MAP = {
 }
 OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA"
 PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
+# Genuinely centred in a box/banner -> container-fit. Everything else is LEFT-aligned and grows
+# rightward into free space (centring a left-aligned bar label shoves it onto its icon, e.g. UPGRADE).
+CENTERED = {"CORE", "DAMAGE DEALER"}
 
 # block = full ability rect (redacted to clear original). body = reflow rect (starts on the header
 # line). indent = first-line indent (pt) so the body begins AFTER the header+pills, then wraps full
@@ -92,6 +95,19 @@ def pick(font):
 def in_rect(bb, r):
     cx, cy = (bb[0]+bb[2])/2, (bb[1]+bb[3])/2
     return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
+
+
+def avail_width(s, spans):
+    """Free space in the reading direction up to the next span on the same line (so a longer PL
+    label grows into empty bar space instead of shrinking or centring onto an icon)."""
+    x0, y0, x1, y1 = s["bb"]; cy = (y0+y1)/2
+    if s["dir"] >= 0:
+        edges = [o["bb"][0] for o in spans if o is not s
+                 and abs((o["bb"][1]+o["bb"][3])/2-cy) < 4 and o["bb"][0] >= x1-0.5]
+        return (min(edges) if edges else x1+110) - s["org"][0] - 1
+    edges = [o["bb"][2] for o in spans if o is not s
+             and abs((o["bb"][1]+o["bb"][3])/2-cy) < 4 and o["bb"][2] <= x0+0.5]
+    return s["org"][0] - (max(edges) if edges else x0-110) - 1
 
 
 def to_logical(x, y, block, rot):
@@ -146,7 +162,7 @@ def find_container(conts, bb):
     return min(cand, key=lambda r: r.width*r.height) if cand else None
 
 
-def draw(page, s, text, key=None, fit=None):
+def draw(page, s, text, key=None, fit=None, avail=None):
     key = key or pick(s["font"]); rot = 0 if s["dir"] >= 0 else 180
     if fit is not None:                       # PL overflows its slot -> fill + centre the container
         fs = s["sz"]
@@ -158,8 +174,8 @@ def draw(page, s, text, key=None, fit=None):
         page.insert_text((fit.x0 + (fit.width-tw)/2, fit.y0 + fit.height/2 + fs*0.34), text,
                          fontsize=fs, fontname=key, fontfile=FPATH[key], color=rgb(s["c"]), rotate=rot)
         return
-    boxw = s["bb"][2]-s["bb"][0]; fs = s["sz"]
-    while fs > 3.5 and FZ[key].text_length(text, fs) > boxw * 1.04:
+    boxw = s["bb"][2]-s["bb"][0]; bound = max(boxw*1.04, avail) if avail else boxw*1.04; fs = s["sz"]
+    while fs > 3.5 and FZ[key].text_length(text, fs) > bound:
         fs -= 0.25
     page.insert_text(fitz.Point(s["org"]), text, fontsize=fs, fontname=key, fontfile=FPATH[key],
                      color=rgb(s["c"]), rotate=rot)
@@ -241,12 +257,15 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
         pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
         if s["t"] in PILLS:
             draw_pill(page, s, pl); continue
-        fit = None                                             # grow into the banner if PL overflows
-        if FZ[pick(s["font"])].text_length(pl, s["sz"]) > (s["bb"][2]-s["bb"][0])*1.12:
-            c = find_container(conts, s["bb"])
-            if c and c.width > (s["bb"][2]-s["bb"][0])*1.3:
-                fit = c
-        draw(page, s, pl, fit=fit)
+        if s["t"] in CENTERED:                                 # centred banner value -> fit the box
+            fit = None
+            if FZ[pick(s["font"])].text_length(pl, s["sz"]) > (s["bb"][2]-s["bb"][0])*1.12:
+                c = find_container(conts, s["bb"])
+                if c and c.width > (s["bb"][2]-s["bb"][0])*1.3:
+                    fit = c
+            draw(page, s, pl, fit=fit)
+        else:                                                  # left-aligned -> grow into free space
+            draw(page, s, pl, avail=avail_width(s, spans))
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
