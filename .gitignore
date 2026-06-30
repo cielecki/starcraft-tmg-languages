@@ -37,3 +37,12 @@ dist/
 *.swp
 .idea/
 .vscode/
+
+# CASC extraction build artifacts (scripts/corpus/build.sh regenerates)
+scripts/corpus/CascLib/
+scripts/corpus/cdncache/
+scripts/corpus/casc_list
+scripts/corpus/casc_grab
+scripts/corpus/casc_online
+scripts/corpus/casc_extract
+scripts/corpus/out/
