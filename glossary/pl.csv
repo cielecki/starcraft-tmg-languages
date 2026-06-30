@@ -1,0 +1,228 @@
+id,en,target,category,source,confidence,notes
+# Factions ------------------------------------------------------------------
+fac-protoss,Protoss,Protosi,unit,sc2,high,decl. protosów; verified in SC2 plPL tooltips
+fac-terran,Terran,Terranie,unit,sc2,high,decl. terran/terranów; SC1 'terran' as adj
+fac-zerg,Zerg,Zergowie,unit,sc2,high,decl. zergów; brand 'Zerg' kept in compounds
+# Unit names (player-familiar PL SC2 names) ---------------------------------
+unit-adept,Adept,Adept,unit,sc2,high,
+unit-stalker,Stalker,Tropiciel,unit,sc2,high,Unit/Name/Stalker
+unit-zealot,Zealot,Zelota,unit,sc2,high,Unit/Name/Zealot
+unit-sentry,Sentry,Wartownik,unit,sc2,high,Unit/Name/Sentry
+unit-artanis,Artanis,Artanis,unit,sc2,high,proper name kept
+unit-marine,Marine,Marine,unit,sc2,high,name kept untranslated in SC2 PL
+unit-marauder,Marauder,Maruder,unit,sc2,high,Unit/Name/Marauder
+unit-medic,Medic,Sanitariuszka,unit,sc2,high,SC1+SC2 agree
+unit-goliath,Goliath,Goliat,unit,sc2,high,Unit/Name/Goliath
+unit-jimraynor,Jim Raynor,Jim Raynor,unit,sc2,high,proper name
+unit-raynor,Raynor,Raynor,unit,sc2,high,proper name
+unit-zergling,Zergling,Zergling,unit,sc2,high,decl. zerglingów
+unit-roach,Roach,Karakan,unit,sc2,high,Unit/Name/Roach; decl. karakanów
+unit-hydralisk,Hydralisk,Hydralisk,unit,sc2,high,name kept; decl. hydralisków
+unit-queen,Queen,Królowa,unit,sc2,high,Unit/Name/Queen
+unit-kerrigan,Kerrigan,Kerrigan,unit,sc2,high,proper name
+unit-drone,Drone,Robotnica,unit,sc2,high,SC2 zerg worker
+unit-overlord,Overlord,Nadrządca,unit,sc2,high,Unit/Name/Overlord
+unit-overseer,Overseer,Nadzorca,unit,sc2,high,Unit/Name/Overseer
+unit-observer,Observer,Obserwator,unit,sc2,medium,SC2 protoss detector
+unit-swarmling,Swarmling,Rojnik,unit,derived,low,TMG zergling variant; lit. swarm+ling
+unit-roachling,Roachling,Karaczek,unit,derived,low,TMG roach spawn; diminutive of karakan
+unit-raptor,Raptor,Raptor,unit,derived,medium,SC2 zergling strain kept
+# Buildings / structures ----------------------------------------------------
+bld-nexus,Nexus,Nexus,unit,sc2,high,kept in SC2 PL
+bld-pylon,Pylon,Pylon,unit,sc2,high,
+bld-gateway,Gateway,Brama,unit,sc2,high,
+bld-warpgate,Warp Gate,Wrota przesyłowe,unit,sc2,high,SC2 warpgate
+bld-forge,Forge,Kuźnia,unit,sc2,high,
+bld-twilightcouncil,Twilight Council,Rada zmroku,unit,sc2,high,
+bld-warpprism,Warp Prism,Pryzmat przesyłowy,unit,sc2,medium,SC2 protoss transport
+bld-barracks,Barracks,Koszary,unit,sc2,high,
+bld-academy,Academy,Akademia,unit,sc2,high,
+bld-armory,Armory,Zbrojownia,unit,sc2,high,
+bld-factory,Factory,Fabryka,unit,sc2,high,
+bld-engbay,Engineering Bay,Hala inżynieryjna,unit,sc2,high,
+bld-orbitalcommand,Orbital Command,Stacja orbitalna,unit,sc2,high,
+bld-supplydepot,Supply Depot,Magazyn,unit,sc2,high,Unit/Name/SupplyDepot
+bld-comsat,Comsat Station,Stacja Comsat,unit,sc1,medium,SC1 terran addon
+bld-dropship,Dropship,Transportowiec,unit,sc2,medium,SC1 Dropship
+bld-hatchery,Hatchery,Wylęgarnia,unit,sc2,high,
+bld-lair,Lair,Nora,unit,sc2,high,SC2 zerg lair
+bld-spawningpool,Spawning Pool,Niecka rozrodcza,unit,sc2,high,
+bld-evolutionchamber,Evolution Chamber,Komora ewolucji,unit,sc2,high,
+bld-roachwarren,Roach Warren,Kolonia karakanów,unit,sc2,high,
+bld-hydraliskden,Hydralisk Den,Nora hydralisków,unit,sc2,high,
+# Resources -----------------------------------------------------------------
+res-minerals,Minerals,Minerały,misc,sc2,high,
+res-vespene,Vespene Gas,Wespan,misc,sc2,high,
+res-creep,Creep,Biomasa,keyword,sc2,high,SC2 'Creep' = Biomasa
+# Combat tags / unit attributes ---------------------------------------------
+tag-biological,Biological,Biologiczny,tag,sc2,high,
+tag-light,Light,Lekki,tag,sc2,high,vs lekkim/lekkie units
+tag-armoured,Armoured,Opancerzony,tag,sc2,high,SC2 'Armored'; UK spelling on cards
+tag-armored,Armored,Opancerzony,tag,sc2,high,US spelling variant
+tag-ground,Ground,Naziemny,tag,sc2,high,jednostki naziemne
+tag-air,Air,Powietrzny,tag,sc2,high,jednostki powietrzne
+tag-massive,Massive,Masywny,tag,sc2,high,jednostki masywne
+tag-psionic,Psionic,Psioniczny,tag,sc2,high,
+tag-mechanical,Mechanical,Mechaniczny,tag,sc2,high,
+tag-structure,Structure,Budowla,tag,sc2,high,
+tag-hero,Hero,Bohater,tag,sc2,medium,TMG unit class
+tag-core,Core,Podstawowa,tag,tmg,medium,TMG unit class (core unit)
+tag-elite,Elite,Elitarna,tag,tmg,medium,TMG unit class
+tag-unique,Unique,Unikatowa,tag,tmg,medium,TMG limit-1 marker
+# Stats / characteristics ---------------------------------------------------
+stat-hp,Hit Points,Punkty życia,stat,sc2,high,abbr PŻ
+stat-health,Health,Zdrowie,stat,sc2,high,
+stat-shield,Shield,Osłona,stat,sc2,high,Plasma Shields -> Osłony
+stat-armour,Armour,Pancerz,stat,sc2,high,
+stat-armor,Armor,Pancerz,stat,sc2,high,US spelling
+stat-evade,Evade,Unik,stat,tmg,medium,TMG evade stat
+stat-speed,Speed,Szybkość,stat,sc2,high,
+stat-size,Size,Rozmiar,stat,tmg,medium,
+stat-range,Range,Zasięg,stat,sc2,high,abbr ZAS
+stat-rng,RNG,ZAS,stat,tmg,medium,Range column abbr
+stat-damage,Damage,Obrażenia,stat,sc2,high,abbr OBR
+stat-dmg,Dmg,Obr,stat,tmg,medium,Damage column abbr
+stat-supply,Supply,Zaopatrzenie,stat,sc2,high,
+stat-combatrange,Combat Range,Zasięg walki,stat,tmg,medium,
+stat-models,Models,Modele,stat,tmg,medium,
+stat-target,Target,Cel,stat,sc2,high,attack target column
+stat-hit,Hit,Traf,stat,tmg,medium,to-hit column abbr
+stat-roa,RoA,SA,stat,tmg,medium,Rate of Attack -> Szybkostrzelność abbr
+stat-roa-full,Rate of Attack,Szybkostrzelność,stat,tmg,medium,
+stat-surgetype,Surge type,Typ nawały,stat,tmg,medium,
+stat-sdice,S Dice,K nawały,stat,tmg,medium,Surge dice
+stat-keyword,Keyword,Słowo kluczowe,stat,tmg,medium,weapon keyword column
+stat-name,Name,Nazwa,stat,tmg,high,
+# Phases --------------------------------------------------------------------
+phase-movement,Movement Phase,Faza ruchu,phase,tmg,high,
+phase-combat,Combat Phase,Faza walki,phase,tmg,high,
+phase-assault,Assault Phase,Faza szturmu,phase,tmg,high,
+phase-any,Any Phase,Dowolna faza,phase,tmg,high,
+# Ability state pills -------------------------------------------------------
+pill-active,Active,Aktywna,ui,tmg,high,
+pill-passive,Passive,Pasywna,ui,tmg,high,
+pill-reaction,Reaction,Reakcja,ui,tmg,high,
+pill-pe,PE,EP,ui,tmg,high,Psionic Energy -> Energia psioniczna; pill '1 PE' -> '1 EP'
+pill-cp,CP,PD,ui,tmg,medium,Command Point -> Punkt dowodzenia
+pill-bm,BM,ZB,ui,tmg,low,Build Marker (?) -> Znacznik budowy; provisional
+kw-psionic-energy,Psionic Energy,Energia psioniczna,keyword,sc2,high,
+kw-command-point,Command Point,Punkt dowodzenia,keyword,tmg,medium,
+# UI / card-frame labels ----------------------------------------------------
+ui-unitcards,Unit Cards,Karty jednostek,ui,tmg,high,
+ui-tacticalcards,Tactical Cards,Karty taktyczne,ui,tmg,high,
+ui-tacticalcard,Tactical Card,Karta taktyczna,ui,tmg,high,
+ui-factioncard,Faction Card,Karta frakcji,ui,tmg,high,
+ui-factioncards,Faction Cards,Karty frakcji,ui,tmg,high,
+ui-specialcard,Special Card,Karta specjalna,ui,tmg,high,
+ui-scenariocards,Scenario Cards,Karty scenariusza,ui,tmg,high,
+ui-mission,Mission,Misja,ui,sc2,high,
+ui-deployment,Deployment,Rozmieszczenie,ui,tmg,high,
+ui-faction,Faction,Frakcja,ui,tmg,high,
+ui-combatrole,Combat Role,Rola bojowa,ui,tmg,high,
+ui-armyslot,Army Slot,Slot armii,ui,tmg,medium,
+ui-combattags,Combat Tags,Cechy bojowe,ui,tmg,high,
+ui-closecombat,Close Combat,Walka wręcz,ui,tmg,high,
+ui-rangedcombat,Ranged Combat,Walka dystansowa,ui,tmg,high,abbr WALKA DYST.
+ui-upgrade,Upgrade,Ulepszenie,ui,sc2,high,
+ui-modelssupply,Models / Supply,Modele / zaopatrzenie,ui,tmg,medium,
+ui-foldhere,fold here,zagnij tutaj,ui,tmg,high,assembly mark
+ui-backtotoc,Back to Table of Contents,Powrót do spisu treści,ui,tmg,medium,
+# Core game keywords (gameplay terms) ---------------------------------------
+kw-unit,Unit,Jednostka,keyword,sc2,high,
+kw-model,Model,Model,keyword,tmg,high,
+kw-weapon,Weapon,Broń,keyword,sc2,high,
+kw-friendly,Friendly,Sojusznicza,keyword,sc2,high,sojusznicza jednostka
+kw-enemy,Enemy,Wroga,keyword,sc2,high,wroga jednostka
+kw-allied,Allied,Sojusznicza,keyword,sc2,high,
+kw-player,Player,Gracz,keyword,sc2,high,
+kw-round,Round,Runda,keyword,tmg,high,Na końcu rundy
+kw-endofround,End of the Round,Koniec rundy,keyword,tmg,high,
+kw-endofroundp,End of Round,Koniec rundy,keyword,tmg,high,
+kw-activation,Activation,Aktywacja,keyword,tmg,high,
+kw-activate,Activate,Aktywować,keyword,tmg,high,
+kw-activated,Activated,Aktywowana,keyword,tmg,high,
+kw-action,Action,Akcja,keyword,tmg,high,
+kw-coherency,Coherency,Spójność,keyword,tmg,high,w spójności
+kw-leadingmodel,Leading Model,Model prowadzący,keyword,tmg,high,
+kw-wholly-within,Wholly Within,Całkowicie w promieniu,keyword,tmg,high,
+kw-within,Within,W promieniu,keyword,tmg,high,within X" = w promieniu X cali
+kw-engaged,Engaged,Związany walką,keyword,tmg,medium,
+kw-disengage,Disengage,Rozłączenie,keyword,tmg,medium,
+kw-charging,Charging,Szarża,keyword,tmg,high,
+kw-charge,Charge,Szarża,keyword,tmg,high,Charge action -> akcja Szarży
+kw-reserves,Reserves,Rezerwy,keyword,tmg,high,z Rezerw
+kw-deploy,Deploy,Rozmieścić,keyword,tmg,high,
+kw-battlefield,battlefield,pole bitwy,keyword,tmg,high,
+kw-groundlevel,Ground Level,Poziom naziemny,keyword,tmg,medium,
+kw-controlling,Controlling,Kontrolujący,keyword,tmg,high,gracz kontrolujący
+kw-controllingplayer,controlling player,gracz kontrolujący,keyword,tmg,high,
+kw-contesting,Contesting,Kontestowanie,keyword,tmg,medium,
+kw-missionmarker,Mission Marker,Znacznik misji,keyword,tmg,high,
+kw-missionmarkers,Mission Markers,Znaczniki misji,keyword,tmg,high,
+kw-factionindicator,Faction Indicator,Wskaźnik frakcji,keyword,tmg,medium,
+kw-specialability,Special Ability,Zdolność specjalna,keyword,tmg,high,
+kw-specialabilities,Special Abilities,Zdolności specjalne,keyword,tmg,high,
+kw-rangedattack,Ranged Attack,Atak dystansowy,keyword,tmg,high,
+kw-meleeattack,Melee Attack,Atak wręcz,keyword,tmg,high,
+kw-evaderoll,Evade Roll,Rzut na unik,keyword,tmg,medium,
+kw-contact,Contact,Kontakt,keyword,tmg,medium,base-to-base contact -> kontakt podstawkami
+kw-base-to-base,base-to-base,kontakt podstawkami,keyword,tmg,medium,lit. 'podstawka przy podstawce'; PL render 'kontakt podstawkami' (base-to-base contact)
+kw-vp,VP,PZ,keyword,tmg,high,Victory Point -> Punkt zwycięstwa
+kw-vps,VPs,PZ,keyword,tmg,high,
+kw-victorypoint,Victory Point,Punkt zwycięstwa,keyword,tmg,high,
+kw-objective,objective,cel,keyword,tmg,medium,
+kw-reinforcements,Reinforcements,Posiłki,keyword,tmg,medium,
+kw-cover,Cover,Osłona terenu,keyword,tmg,medium,distinct from Shield(Osłona)
+kw-terrain,Terrain,Teren,keyword,sc2,high,
+kw-impassable-terrain,Impassable Terrain,Teren nieprzebyty,keyword,tmg,medium,
+# Game-mechanic keywords (TMG ability keywords; kept ALL CAPS, with (N) value) ---
+mech-buff,BUFF,WZMOCNIENIE,keyword,tmg,high,BUFF Stat (N)
+mech-debuff,DEBUFF,OSŁABIENIE,keyword,tmg,high,
+mech-precision,PRECISION,PRECYZJA,keyword,tmg,high,PRECISION (N) -> PRECYZJA (N)
+mech-impact,IMPACT,UDERZENIE,keyword,tmg,high,IMPACT (N) X+
+mech-pierce,PIERCE,PRZEBICIE,keyword,tmg,high,PIERCE Light (N)
+mech-anti-evade,ANTI-EVADE,ANTY-UNIK,keyword,tmg,high,
+mech-displacement,DISPLACEMENT,PRZEMIESZCZENIE,keyword,tmg,high,
+mech-tough,TOUGH,WYTRZYMAŁOŚĆ,keyword,tmg,high,TOUGH (N)
+mech-heal,HEAL,LECZENIE,keyword,tmg,high,HEAL (N)
+mech-place,PLACE,UMIESZCZENIE,keyword,tmg,high,PLACE (N) effect
+mech-respawn,RESPAWN,ODRODZENIE,keyword,tmg,high,RESPAWN (N)
+mech-instant,INSTANT,NATYCHMIASTOWY,keyword,tmg,high,
+mech-summon,SUMMON,PRZYWOŁANIE,keyword,tmg,high,
+mech-stay-in-play,STAY IN PLAY,POZOSTAJE W GRZE,keyword,tmg,medium,
+mech-critical-hit,CRITICAL HIT,TRAFIENIE KRYTYCZNE,keyword,tmg,high,CRITICAL HIT (N)
+mech-non-lethal,NON-LETHAL DAMAGE,OBRAŻENIA NIEŚMIERTELNE,keyword,tmg,low,non-lethal; provisional
+mech-dodge,DODGE,UNIK,keyword,tmg,medium,DODGE (N)
+mech-stomp,STOMP,TRATOWANIE,keyword,tmg,medium,
+mech-sidearm,SIDEARM,BROŃ BOCZNA,keyword,tmg,medium,
+mech-pinpoint,PINPOINT,CELNOŚĆ,keyword,tmg,medium,
+mech-specialist,SPECIALIST,SPECJALISTA,keyword,tmg,medium,
+mech-long-range,LONG RANGE,DALEKI ZASIĘG,keyword,tmg,high,LONG RANGE (X")
+mech-indirect-fire,INDIRECT FIRE,OGIEŃ POŚREDNI,keyword,tmg,medium,
+mech-burst-fire,BURST FIRE,OGIEŃ SERYJNY,keyword,tmg,medium,
+mech-locked-in,LOCKED IN,UNIERUCHOMIENIE,keyword,tmg,low,provisional
+mech-hidden,HIDDEN,UKRYTY,keyword,tmg,medium,
+mech-on-creep,ON CREEP,NA BIOMASIE,keyword,tmg,high,
+mech-hits,HITS,TRAFIENIA,keyword,tmg,medium,
+mech-repeatable,REPEATABLE,POWTARZALNY,keyword,tmg,medium,
+mech-malevolent,MALEVOLENT,ZŁOWROGI,keyword,tmg,low,provisional
+# Abilities / keywords from SC1/SC2 kept as anglicisms (Blizzard convention) -
+abil-blink,Blink,Blink,ability,sc2,high,kept untranslated in SC2 PL
+abil-burrow,Burrow,Zagrzebanie,ability,sc1,medium,SC1 'Zagrzebanie'; SC2 kept 'Burrow'
+abil-stimpack,Stimpack,Stimpack,ability,sc2,high,kept untranslated
+abil-cloak,Cloak,Maskowanie,ability,sc1,high,SC1 'Maskowanie'
+abil-transfusion,Transfusion,Transfuzja,ability,tmg,medium,SC2 kept 'Transfusion'; PL plain Transfuzja
+abil-detection,Detection,Wykrywanie,keyword,sc2,high,
+abil-detector,Detector,Wykrywacz,keyword,sc2,high,
+abil-regeneration,Regeneration,Regeneracja,ability,sc2,high,
+abil-shade,Shade,Cień,keyword,sc2,high,Adept's Shade token = żeton Cienia
+# Weapons (proper names; mostly kept, PL-declined where natural) -------------
+wpn-psiblades,Psi Blades,Psioniczne ostrza,weapon,sc2,medium,SC2 zealot weapon
+wpn-glaivecannon,Glaive Cannon,Działo glewii,weapon,tmg,medium,Adept ranged
+wpn-c14rifle,C-14 Rifle,Karabin C-14,weapon,sc2,high,SC2 marine gunsmith
+wpn-c14riffle,C-14 Riffle,Karabin C-14,weapon,sc2,high,typo variant on card
+wpn-claws,Claws,Szpony,weapon,sc2,high,zergling claws
+wpn-talons,Talons,Szpony,weapon,tmg,low,
+wpn-needlespines,Needle Spines,Kolce,weapon,sc2,medium,hydralisk
+wpn-acidspines,Acid Spines,Kolce kwasowe,weapon,sc2,high,
+wpn-acidsaliva,Acid Saliva,Kwasowa ślina,weapon,sc2,high,
