@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
-"""Card localization by editing the original PDF in place — faithful version.
+"""Localize a card by editing the original PDF in place — faithful typography.
 
-Principles learned from the visual-bug pass:
-  - Redaction by a span's bbox can catch an OVERLAPPING neighbour (stat label rects overlap the
-    big stat-value glyphs). So: redact what we replace, then reinsert EVERY removed span — the
-    translated ones as PL, the collateral ones (e.g. stat numbers) as their original text.
-  - Abilities are structured (name + colour-coded pills + wrapped body). Keep the pills on their
-    coloured backgrounds (translate in place); reflow only the body sentence, with padding, and
-    draw the header/pills ON TOP so the body never covers them.
-  - The card prints double-sided: back is normal (dir(1,0)), front is 180deg (dir(-1,0)).
+The SC:TMG cards are typeset in NOTO SANS CONDENSED (Regular/Medium/ExtraBold/Black) — a free,
+Polish-capable font (the display titles use proprietary Gineso/Aviano, which we approximate with
+Noto Black). So we redraw each translated span in the MATCHING Noto Condensed weight, at its
+original position, preserving the layout exactly. Run scripts/build_fonts.py once to create the
+weights under assets/fonts/.
 
-Note on shadows: the card's subtle text drop-shadows are part of the original ART (kept via
-text-only redaction), so they stay correct. "Orphan" shadows only appear if text is deleted
-without reinsertion (the stat-number regression) — collateral reinsertion prevents that.
+Other principles (from the visual-bug passes):
+  - Redact what we replace; reinsert collateral originals so nothing vanishes.
+  - Don't redact the big stat NUMBERS (clip the tiny stat-label redaction above them) — a reinsert
+    lands off their baked shadow and doubles glyphs (the "/" in 5/8). Numbers stay pristine.
+  - Abilities = name + colour pills + body with BOLD keywords. Pills: translate, bold, centred.
+    Body: reflow as rich text (insert_htmlbox) so keywords stay bold.
 """
 import sys, fitz
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FONT = "/System/Library/Fonts/Supplemental/Arial Narrow.ttf"
+FDIR = ROOT / "assets/fonts"
+FACE = {"reg": "NotoSansCond-Regular.ttf", "med": "NotoSansCond-Medium.ttf",
+        "ext": "NotoSansCond-ExtraBold.ttf", "blk": "NotoSansCond-Black.ttf"}
+FPATH = {k: str(FDIR / v) for k, v in FACE.items()}
+FZ = {k: fitz.Font(fontfile=p) for k, p in FPATH.items()}
+ARCHIVE = fitz.Archive(str(FDIR))
+BODY_CSS = """
+@font-face { font-family: NC; font-weight: 500; src: url("NotoSansCond-Medium.ttf"); }
+@font-face { font-family: NC; font-weight: 800; src: url("NotoSansCond-ExtraBold.ttf"); }
+* { font-family: NC; font-weight: 500; color: #000000; margin: 0; padding: 0; line-height: 1.0; }
+b { font-weight: 800; }
+"""
 
 MAP = {
     "PROTOSS FACTION": "FRAKCJA PROTOSÓW", "UNIT CARDS": "KARTY JEDNOSTEK",
@@ -37,52 +48,67 @@ MAP = {
     "STRIKE": "UDERZENIE", "GLAIVE STRIKE": "UDERZ. GLEWIĄ", "GLAIVE CANNON": "DZIAŁO GLEWII",
     "Ground": "Naziem.", "Light": "Lekki", "All": "Wsz.",
     "PIERCE Light (2)": "PRZEBICIE Lekki (2)", "ANTI-EVADE (1)": "ANTY-UNIK (1)", "FOR": "DLA",
-    # ability headers (kept in place; bodies reflow separately)
     "RESONATING GLAVES:": "REZONUJĄCE GLEWIE:", "GUIDANCE:": "NAPROWADZANIE:",
     "PSIONIC TRANSFER:": "PSIONICZNY TRANSFER:", "PSIONIC PRESENCE:": "PSIONICZNA OBECNOŚĆ:",
 }
+OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA"
+PILLS = {"ACTIVE", "PASSIVE", "1 PE"}
 
-# Position-keyed overrides (round(x0),round(y0)) -> PL, for context-dependent grammar.
-OVERRIDES = {(212, 543): "UDERZENIA"}  # "FOR STRIKE" -> "DLA UDERZENIA" (genitive)
-
-# Ability bodies: redact the whole block rect, reflow the PL body into `body` (padded, clear of
-# the header/pill line); header+pills are reinserted on top via MAP. rot: 0 normal, 180 front.
-ABILITIES = [
-    {"rect": [189, 476, 349, 497], "body": [197, 486, 345, 497], "rot": 0,
-     "pl": "Działo glewii tej jednostki zyskuje WZMOCNIENIE RoA (1)."},
-    {"rect": [351, 476, 489, 497], "body": [359, 486, 486, 497], "rot": 0,
-     "pl": "Broń dystansowa Działa glewii zyskuje ANTY-UNIK (2)."},
-    {"rect": [85, 313, 421, 348], "body": [88, 314, 320, 333], "rot": 180,
-     "pl": "Umieść żeton Cienia całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton Cienia jako model prowadzący. Żeton ma PRZEMIESZCZENIE."},
-    {"rect": [85, 352, 421, 376], "body": [88, 353, 320, 371], "rot": 180,
-     "pl": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu Cienia zyskują PRECYZJĘ (1)."},
+ABILITIES = [  # HTML body (bold keywords), reflowed clear of the header/pill line
+    {"rect": [189, 476, 349, 497], "body": [196, 486, 346, 498], "rot": 0,
+     "html": "<b>Działo glewii</b> tej jednostki zyskuje <b>WZMOCNIENIE RoA (1)</b>."},
+    {"rect": [351, 476, 489, 497], "body": [358, 486, 487, 498], "rot": 0,
+     "html": "Broń dystansowa <b>Działa glewii</b> tej jednostki zyskuje <b>ANTY-UNIK (2)</b>."},
+    {"rect": [85, 313, 421, 348], "body": [88, 314, 320, 334], "rot": 180,
+     "html": "Umieść żeton <b>Cienia</b> całkowicie w promieniu 12\" od dowolnego modelu tej jednostki. Na końcu rundy gracz kontrolujący może ustawić wszystkie modele w spójności, traktując żeton <b>Cienia</b> jako model prowadzący. Żeton ma <b>PRZEMIESZCZENIE</b>."},
+    {"rect": [85, 352, 421, 376], "body": [88, 353, 320, 372], "rot": 180,
+     "html": "Wszystkie bronie sojuszniczych jednostek atakujące wrogą jednostkę w promieniu 4\" od żetonu <b>Cienia</b> zyskują <b>PRECYZJĘ (1)</b>."},
 ]
-
-
-def tl(s, fs):
-    return fitz.get_text_length(s, fontname="helv", fontsize=fs)
 
 
 def rgb(c):
     return ((c >> 16 & 255)/255, (c >> 8 & 255)/255, (c & 255)/255)
 
 
-def center_in(bb, rect):
+def pick(font):
+    """Map a source font name to a Noto Condensed weight key."""
+    f = font.lower()
+    if "black" in f or "bla" in f or "aviano" in f or "gineso" in f:
+        return "blk"
+    if "extra" in f or "bol" in f:
+        return "ext"
+    if "medium" in f or "-md" in f or "geogro" in f:
+        return "med"
+    return "reg"
+
+
+def in_rect(bb, r):
     cx, cy = (bb[0]+bb[2])/2, (bb[1]+bb[3])/2
-    return rect[0] <= cx <= rect[2] and rect[1] <= cy <= rect[3]
+    return r[0] <= cx <= r[2] and r[1] <= cy <= r[3]
 
 
-def draw_label(page, origin, text, size, color, dirx, boxw):
-    fs = size
-    while fs > 3.5 and tl(text, fs) > boxw * 1.04:
+def draw(page, s, text, key=None):
+    key = key or pick(s["font"]); boxw = s["bb"][2]-s["bb"][0]; fs = s["sz"]
+    while fs > 3.5 and FZ[key].text_length(text, fs) > boxw * 1.04:
         fs -= 0.25
-    page.insert_text(fitz.Point(origin), text, fontsize=fs, fontfile=FONT, fontname="F",
-                     color=color, rotate=0 if dirx >= 0 else 180)
+    page.insert_text(fitz.Point(s["org"]), text, fontsize=fs, fontname=key, fontfile=FPATH[key],
+                     color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
+
+
+def draw_pill(page, s, text):
+    x0, y0, x1, y1 = s["bb"]; w = x1-x0; fs = s["sz"]
+    while fs > 3 and FZ["ext"].text_length(text, fs) > w * 0.98:
+        fs -= 0.2
+    tw = FZ["ext"].text_length(text, fs)
+    x = x0 + (w-tw)/2 if s["dir"] >= 0 else x1 - (w-tw)/2
+    page.insert_text((x, s["org"][1]), text, fontsize=fs, fontname="ext", fontfile=FPATH["ext"],
+                     color=rgb(s["c"]), rotate=0 if s["dir"] >= 0 else 180)
 
 
 def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"):
+    page_no = int(page_no)
     doc = fitz.open(ROOT / "sources/pdf" / src)
-    page = doc[int(page_no)]
+    page = doc[page_no]
     spans = []
     for b in page.get_text("dict")["blocks"]:
         for l in b.get("lines", []):
@@ -90,20 +116,22 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
             for s in l.get("spans", []):
                 if s["text"].strip():
                     spans.append({"t": s["text"].strip(), "bb": s["bbox"], "org": s["origin"],
-                                  "c": s["color"], "sz": s["size"], "dir": dirx})
+                                  "c": s["color"], "sz": s["size"], "dir": dirx, "font": s["font"]})
 
     ab_rects = [a["rect"] for a in ABILITIES]
     targets = [s for s in spans if s["t"] in MAP]
-    redact = [s["bb"] for s in targets] + ab_rects
-    # collateral: non-target spans, not inside an ability, whose bbox is caught by a redact rect
-    collateral = []
-    for s in spans:
-        if s in targets:
-            continue
-        if any(center_in(s["bb"], r) for r in ab_rects):
-            continue  # body fragment -> handled by reflow
-        if any(fitz.Rect(s["bb"]).intersects(fitz.Rect(r)) for r in redact):
-            collateral.append(s)
+    redact = [list(r) for r in ab_rects]
+    for s in targets:
+        x0, y0, x1, y1 = s["bb"]
+        if s["sz"] < 5.5:  # tiny stat label over a big number -> don't reach the number
+            y1 = y0 + (y1-y0)*0.45
+        redact.append([x0, y0, x1, y1])
+    collateral = [s for s in spans if s not in targets
+                  and not any(in_rect(s["bb"], r) for r in ab_rects)
+                  and any(fitz.Rect(s["bb"]).intersects(fitz.Rect(r)) for r in redact)]
+    seen = set(); collateral = [s for s in collateral
+                                if (s["t"], round(s["org"][0]), round(s["org"][1])) not in seen
+                                and not seen.add((s["t"], round(s["org"][0]), round(s["org"][1])))]
 
     for r in redact:
         page.add_redact_annot(fitz.Rect(r))
@@ -111,26 +139,19 @@ def main(src="StarCraft-Protoss-P2P-Card-Sheets-A4_EN.pdf", page_no=0, lang="pl"
                           graphics=fitz.PDF_REDACT_LINE_ART_NONE,
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
-    # 1) ability bodies (drawn first, under the header/pills)
     for a in ABILITIES:
-        rect = fitz.Rect(a["body"]); fs = 6.5
-        while fs > 3.0:
-            if page.insert_textbox(rect, a["pl"], fontsize=fs, fontname="F", fontfile=FONT,
-                                   color=(0, 0, 0), align=0, rotate=a["rot"]) >= 0:
-                break
-            fs -= 0.25
-    # 2) collateral originals (stat numbers etc.) — keep them
+        page.insert_htmlbox(fitz.Rect(a["body"]), f'<div style="font-size:6.6pt">{a["html"]}</div>',
+                            css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
     for s in collateral:
-        draw_label(page, s["org"], s["t"], s["sz"], rgb(s["c"]), s["dir"], s["bb"][2]-s["bb"][0])
-    # 3) translated labels + pills + headers, on top
+        draw(page, s, s["t"])
     for s in targets:
         pl = OVERRIDES.get((round(s["bb"][0]), round(s["bb"][1]))) or MAP[s["t"]]
-        draw_label(page, s["org"], pl, s["sz"], rgb(s["c"]), s["dir"], s["bb"][2]-s["bb"][0])
+        draw_pill(page, s, pl) if s["t"] in PILLS else draw(page, s, pl)
 
     out = ROOT / f"build/{lang}/cards"; out.mkdir(parents=True, exist_ok=True)
     stem = f"{Path(src).stem}_p{page_no}_{lang}_inplace"
     pdf = out / f"{stem}.pdf"
-    one = fitz.open(); one.insert_pdf(doc, from_page=int(page_no), to_page=int(page_no))
+    one = fitz.open(); one.insert_pdf(doc, from_page=page_no, to_page=page_no)
     one.save(pdf)
     fitz.open(pdf)[0].get_pixmap(dpi=200).save(out / f"{stem}.png")
     print(f"targets={len(targets)} collateral={len(collateral)} bodies={len(ABILITIES)} -> {pdf}")

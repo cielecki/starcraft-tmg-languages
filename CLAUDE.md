@@ -36,6 +36,9 @@ translation.
 - Work is tracked in GitHub Issues (milestones M1–M5). Reference issues in commits.
 
 ## Fonts
-SC display fonts (Aviano/Gineso) are subsetted in the PDFs and lack PL glyphs — do not try to
-reuse them. Substitute PL-capable look-alikes (Oswald / Bebas Neue / Barlow Condensed / DIN
-Condensed) and embed full glyph sets.
+The card body + headers are typeset in **Noto Sans Condensed** (Regular/Medium/ExtraBold/Black) —
+free and PL-capable, so we use the REAL font, matched per-weight. Build the weights once with
+`python3 scripts/build_fonts.py` (instances width-75 from Google's Noto Sans variable font into
+`assets/fonts/`, OFL, committed). The display TITLES use proprietary Aviano/Gineso (subsetted, no
+PL glyphs) — approximate with Noto Black. `card_inplace.py` maps each source span's font name to a
+Noto weight via `pick()`.
