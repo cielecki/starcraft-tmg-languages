@@ -29,6 +29,9 @@ import sys, json, argparse, fitz
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Bodies that only fit below the legible minimum font size — collected across a run and written to
+# build/<lang>/_unfit.txt so genuinely-too-long PL translations can be shortened (never overflowed).
+UNFIT = []
 FDIR = ROOT / "assets/fonts"
 FACE = {"reg": "NotoSansCond-Regular.ttf", "med": "NotoSansCond-Medium.ttf",
         "ext": "NotoSansCond-ExtraBold.ttf", "blk": "NotoSansCond-Black.ttf"}
@@ -274,6 +277,40 @@ def find_container(conts, bb):
     return min(cand, key=lambda r: r.width*r.height) if cand else None
 
 
+# ── ability-mode pill badges (coloured rects) ───────────────────────────────────────────────────
+# MUST match scripts/lint_overlaps.py's pill definition so the body carve aligns exactly with what
+# the gate checks: small filled rects in the three ability-mode colours, in the same size window.
+PILL_RGB = {(0x36, 0xa9, 0xe0), (0x3f, 0xa4, 0x35), (0xcd, 0x16, 0x19)}   # blue / green / red
+PILL_TOL = 0.06
+PILL_WRANGE = (9.0, 26.0)
+PILL_HRANGE = (5.5, 12.0)
+
+
+def find_pills(page):
+    """The small filled colour badges that mark an ability mode (the gate's pill class). Returns a
+    list of page Rects. Same colours / size window as lint_overlaps.find_pills so a body carved off
+    these rects passes the pill-intrusion gate by construction."""
+    refs = [(r/255, g/255, b/255) for (r, g, b) in PILL_RGB]
+    out = []
+    for d in page.get_drawings():
+        fill = d.get("fill")
+        if not fill or d.get("type") not in ("f", "fs"):
+            continue
+        if not any(all(abs(fill[i]-ref[i]) < PILL_TOL for i in range(3)) for ref in refs):
+            continue
+        r = fitz.Rect(d["rect"])
+        if PILL_WRANGE[0] <= r.width <= PILL_WRANGE[1] and PILL_HRANGE[0] <= r.height <= PILL_HRANGE[1]:
+            out.append(r)
+    return out
+
+
+def _pill_logical_box(pill, code):
+    """A pill page Rect -> its [x0,y0,x1,y1] in the reading frame for the given orientation code."""
+    ax, ay = page_to_logical(pill.x0, pill.y0, code)
+    bx, by = page_to_logical(pill.x1, pill.y1, code)
+    return [min(ax, bx), min(ay, by), max(ax, bx), max(ay, by)]
+
+
 def _logical_box(s, code):
     """A span's [x0,y0,x1,y1] mapped into its reading frame (page-dimension transform, all 4 orients).
     Corners are transformed and re-ordered so the result is a proper [x0<=x1, y0<=y1] logical box."""
@@ -453,7 +490,7 @@ def load_segments(path, doc):
         if not tgt:
             continue
         if r.get("kind") == "body":
-            rec = {"target_text": r["target_text"], "bold": r.get("bold") or []}
+            rec = {"target_text": r["target_text"], "bold": r.get("bold") or [], "id": r["id"]}
             by_id[r["id"]] = rec
             hdr = (r.get("header_source") or "").strip()
             if hdr:
@@ -485,6 +522,48 @@ def apply_bold(text, ranges):
         pos = b
     out.append(_html.escape(text[pos:]))
     return "".join(out)
+
+
+BODY_MIN_FS = 4.0           # never shrink a body below this — clamp + record to _unfit.txt instead
+
+
+def carve_body_top(g, block_lb, pills_lb):
+    """Carve the body's reflow region off the ability-mode pill badges so the prose can never enter a
+    badge (the pill-intrusion gate). All inputs are in the body's LOGICAL reading frame.
+
+    The pills sit at the START of the body (the header line, in reading order). We compute the
+    body's first-line band [base1 top .. base1 + spacing] and, if any pill overlaps that band on the
+    body's x-extent, drop the reflow TOP to just below the lowest overlapping pill — so every body
+    line flows BELOW the badges at full block width. Returns the new logical top y for line 1's box."""
+    fs = g["fs"]; sp = max(g.get("spacing", fs*1.2), fs)
+    # the logical box that line 1 would occupy (top .. one line down), across the body x-extent
+    line_top = g["base1"] - fs
+    line_bot = g["base1"] + sp*0.4
+    bx0, bx1 = g["left"]-1, g["right"]+1
+    drop_to = None
+    for p in pills_lb:
+        # pill overlaps the first-line band AND the body's horizontal extent?
+        if p[3] <= line_top or p[1] >= line_bot:
+            continue
+        if p[2] <= bx0 or p[0] >= bx1:
+            continue
+        drop_to = p[3] if drop_to is None else max(drop_to, p[3])
+    return drop_to                                              # None -> no first-line pill to clear
+
+
+def _measure_body_scale(page_size, inner, page_rect, rot, fs, lh, indent):
+    """Dry-run the reflow on a SCRATCH page to learn insert_htmlbox's auto-scale for this box/font.
+    insert_htmlbox already shrinks-to-fit, returning (spare_width, scale); scale<1 means it had to
+    shrink the requested font to make the prose fit. We use that to compute the EFFECTIVE font size
+    so we can detect when a body only fits below the legible minimum (an unfit segment)."""
+    tmp = fitz.open()
+    pg = tmp.new_page(width=page_size[0], height=page_size[1])
+    html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.2f}pt;'
+            f'line-height:{lh:.3f}">{inner}</div>')
+    ret = pg.insert_htmlbox(page_rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=rot)
+    scale = ret[1] if isinstance(ret, (tuple, list)) and len(ret) > 1 else 1.0
+    tmp.close()
+    return scale if scale and scale > 0 else 1.0
 
 
 def draw(page, s, text, key=None, fit=None, avail=None):
@@ -606,6 +685,7 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
     spans = merge_split_colon_headers(spans)        # 'FERAL RAGE'(Bold)+':' -> one ExtraBold header
 
     conts = containers(page)
+    page_pills = find_pills(page)                               # ability-mode badges to carve bodies off
     abil = detect_abilities(page, spans)                        # AUTO-DETECT (was hardcoded ABILITIES)
     # Attach derived geometry + the PL body to each detected block. Match the body ROBUSTLY by the
     # block's EN header (by_header) — language-independent and order-independent — so the PL lands on
@@ -688,6 +768,14 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
         if k not in seen:
             seen.add(k); collateral.append(s)
 
+    # DRAW-ONCE: a collateral span is removed-then-redrawn, so its ORIGINAL must actually be
+    # redacted. The translated-label redact rects are tight to their own text and need NOT cover a
+    # neighbouring collateral glyph (e.g. a '×' wedged in a vertical SUPPLY column between two
+    # translated tokens), so the original would survive and the redraw would double it. Adding each
+    # collateral span's OWN bbox to the redaction guarantees the original is gone before we redraw it
+    # exactly once.
+    redact += [list(s["bb"]) for s in collateral]
+
     for r in redact:
         page.add_redact_annot(fitz.Rect(r))
     page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE,
@@ -695,6 +783,7 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
                           text=fitz.PDF_REDACT_TEXT_REMOVE)
 
     n_bodies = 0
+    page_size = (PAGE_W, PAGE_H)
     for a, g, bs, seg in derived:                              # bodies (rich text -> bold keywords)
         if not g or not seg:                                   # no prose, or untranslated -> leave EN
             continue
@@ -704,12 +793,29 @@ def render_page(src, page_no, lang, by_source, by_id, by_header, doc_key):
         # Keep the body inside its own block (in the LOGICAL frame, so it holds for all 4 orients):
         # the block's logical bottom edge bounds how far the reflow may grow downward.
         blb = _logical_box({"bb": a["block"]}, a["rot"])
-        bottom = min(g["last"]+fs+2, blb[3]-0.5)
+        # CARVE OFF PILLS: the ability-mode badges sit on the body's FIRST line (the header line). A
+        # single-rect reflow would flow straight through them, so when a pill overlaps that first
+        # line we drop the reflow TOP to just below it — the prose then flows entirely BELOW the
+        # badges and can never enter one (the pill-intrusion gate). Pills mapped into this body's
+        # logical reading frame so the carve holds for all 4 orientations.
+        pills_lb = [_pill_logical_box(p, a["rot"]) for p in page_pills]
+        drop = carve_body_top(g, blb, pills_lb)
+        if drop is not None and drop + 0.5 > y0:
+            y0 = drop + 0.8                                    # start line 1 just under the badge row
+        bottom = min(max(g["last"]+fs+2, y0 + fs*2), blb[3]-0.5)   # use full block height after a carve
         lrect = (g["left"]-0.5, y0, g["right"]+1, bottom)
         rect = logical_rect_to_page(lrect[0], lrect[1], lrect[2], lrect[3], a["rot"])
         indent = g["start_x"] - g["left"] + 1.5*FZ["med"].text_length(" ", fs)
         body = seg["target_text"]
         inner = apply_bold(body, seg["bold"]) if seg["bold"] else auto_bold(body)
+        # insert_htmlbox auto-shrinks to fit the box; measure the scale so we can flag a body that
+        # only fits below the legible minimum as UNFIT (needs a shorter translation) instead of
+        # silently rendering it microscopic.
+        scale = _measure_body_scale(page_size, inner, rect, a["rot"], fs, lh, indent)
+        if fs * scale < BODY_MIN_FS - 0.05:
+            UNFIT.append({"doc": doc_key, "page": page_no, "id": seg.get("id", ""),
+                          "header": a.get("header", ""), "eff_fs": round(fs*scale, 2),
+                          "text": body})
         html = (f'<div style="text-indent:{indent:.1f}pt;font-size:{fs:.1f}pt;'
                 f'line-height:{lh:.3f}">{inner}</div>')
         page.insert_htmlbox(rect, html, css=BODY_CSS, archive=ARCHIVE, rotate=a["rot"])
@@ -785,6 +891,27 @@ def main(argv=None):
           f"{len(by_header)} header-keyed)")
     for p in pages:
         render_page(src, p, lang, by_source, by_id, by_header, doc_key)
+    write_unfit_report(lang)
+
+
+def write_unfit_report(lang):
+    """Write the cumulative UNFIT list (bodies that only fit below the legible minimum) to
+    build/<lang>/_unfit.txt. Accumulates across sheets within one process (merge_cards calls main()
+    once per army), so the report lists every too-long PL body that needs a shorter translation —
+    rather than overflowing it onto neighbours. Empty list -> a clean 'none' marker."""
+    out = ROOT / f"build/{lang}"
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / "_unfit.txt"
+    lines = ["# Bodies that could not fit their region at >= {:.1f}pt — translations to shorten.".format(BODY_MIN_FS),
+             "# Columns: doc | page | id | header | effective_fs | text", ""]
+    if not UNFIT:
+        lines.append("(none — every body fits its region at a legible size)")
+    else:
+        for u in sorted(UNFIT, key=lambda u: (u["doc"], u["page"])):
+            lines.append(f"{u['doc']} | p{u['page']} | {u['id']} | {u['header']} | "
+                         f"{u['eff_fs']}pt | {u['text']}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"  _unfit.txt: {len(UNFIT)} unfit bod{'y' if len(UNFIT)==1 else 'ies'} -> {path}")
 
 
 if __name__ == "__main__":

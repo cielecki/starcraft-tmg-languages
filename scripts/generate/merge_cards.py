@@ -103,16 +103,17 @@ def main():
         finals.add(out.name)
         print(f"  {out.name}: {len(pages)} pages  ({out.stat().st_size//1024//1024} MiB)")
 
-    # PRUNE: the output dir must hold ONLY the three final sheets. Remove the per-page working
-    # dir, any old test/ extracts, the standalone Adept file, and anything else left behind.
+    # PRUNE: the output dir must hold ONLY the three final sheets (+ the _unfit.txt report). Remove
+    # the per-page working dir, any old test/ extracts, the standalone Adept file, and anything else.
+    keep = finals | {"_unfit.txt"}            # the unfit-bodies report is a deliverable, not clutter
     for child in out_dir.iterdir():
-        if child.name in finals:
+        if child.name in keep:
             continue
         if child.is_dir():
             shutil.rmtree(child)
         else:
             child.unlink()
-    print(f"\n{out_dir}/ now contains only: {sorted(finals)}")
+    print(f"\n{out_dir}/ now contains: {sorted(keep & {c.name for c in out_dir.iterdir()})}")
 
 
 if __name__ == "__main__":
